@@ -426,6 +426,79 @@
   margin: var(--space-3) 0 var(--space-2);
 }
 
+/* Compact in-game Ortam menu (topbar / fold chrome) */
+.theme-picker--menu {
+  position: relative;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  z-index: 20;
+}
+
+.theme-picker__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1_5);
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  padding: 0 var(--space-2);
+  border: var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+
+.theme-picker__trigger:hover,
+.theme-picker__trigger:focus-visible,
+.theme-picker__trigger.is-open {
+  border-color: var(--stamp);
+  color: var(--stamp);
+}
+
+.theme-picker__trigger:focus-visible {
+  outline: 2px solid var(--stamp);
+  outline-offset: 2px;
+}
+
+.theme-picker__trigger-label {
+  line-height: 1;
+}
+
+.theme-picker__popover {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  z-index: 30;
+  min-width: 11.5rem;
+  padding: var(--space-2);
+  border: var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: var(--shadow-lift);
+}
+
+.theme-picker__popover .theme-picker__rail {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1_5);
+}
+
+.game-topbar__actions .theme-picker--menu {
+  order: -1;
+}
+
+.fold-topbar .theme-picker--menu {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 /* Map zoom chrome — theme tokens */
 .map-zoom-btn {
   width: 2.75rem;

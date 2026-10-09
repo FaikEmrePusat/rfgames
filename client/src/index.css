@@ -1233,8 +1233,8 @@ body {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  min-height: 1.75rem;
+  gap: var(--space-2) var(--space-3);
+  min-height: var(--touch-min);
 }
 
 .fold-progress {

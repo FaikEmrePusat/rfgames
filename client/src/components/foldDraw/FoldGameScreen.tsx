@@ -12,6 +12,8 @@ import { FoldInkColorPicker } from './FoldInkColorPicker';
 import { downloadFoldPaperPng } from './exportFoldPng';
 import { FOLD_INK_PRESETS } from './foldRecentColors';
 import { PEN_KIND_LABELS, type PenKind } from './penStyles';
+import { ThemePicker } from '../../theme/ThemePicker';
+import { useTheme } from '../../theme/useTheme';
 
 const ADVANCED_PEN_KINDS: PenKind[] = ['pencil', 'marker', 'brush', 'charcoal'];
 
@@ -39,6 +41,7 @@ export function FoldGameScreen({
   canDraw: canDrawProp,
   foldBusy = false,
 }: Props) {
+  const { theme, setTheme } = useTheme();
   const [ink, setInk] = useState<string>(FOLD_INK_PRESETS[0]);
   const [width, setWidth] = useState(3.5);
   const [tool, setTool] = useState<FoldTool>('pen');
@@ -76,25 +79,32 @@ export function FoldGameScreen({
 
   return (
     <div className="fold-game-screen">
-      {game.phase === 'drawing' && (
-        <header className="fold-topbar">
-          <div className="fold-progress" aria-label="Katlar">
-            {plan.map((p) => (
-              <span
-                key={p.i}
-                className={`fold-dot ${p.active ? 'is-active' : ''} ${p.done ? 'is-done' : ''}`}
-                title={FOLD_SECTION_LABELS[p.i as 0 | 1 | 2 | 3]}
-              />
-            ))}
-          </div>
+      <header className="fold-topbar">
+        {game.phase === 'drawing' ? (
+          <>
+            <div className="fold-progress" aria-label="Katlar">
+              {plan.map((p) => (
+                <span
+                  key={p.i}
+                  className={`fold-dot ${p.active ? 'is-active' : ''} ${p.done ? 'is-done' : ''}`}
+                  title={FOLD_SECTION_LABELS[p.i as 0 | 1 | 2 | 3]}
+                />
+              ))}
+            </div>
+            <p className="fold-topbar-title">
+              <span className="fold-topbar-section">{sectionLabel}</span>
+              <span className="fold-topbar-sep">·</span>
+              <span style={{ color: artist.color }}>{artist.name}</span>
+              {isWaiting && <span className="fold-topbar-sep"> · bekleniyor</span>}
+            </p>
+          </>
+        ) : (
           <p className="fold-topbar-title">
-            <span className="fold-topbar-section">{sectionLabel}</span>
-            <span className="fold-topbar-sep">·</span>
-            <span style={{ color: artist.color }}>{artist.name}</span>
-            {isWaiting && <span className="fold-topbar-sep"> · bekleniyor</span>}
+            <span className="fold-topbar-section">Açılış</span>
           </p>
-        </header>
-      )}
+        )}
+        <ThemePicker theme={theme} onChange={setTheme} variant="menu" />
+      </header>
 
       <div className="fold-stage">
         {isWaiting ? (
