@@ -154,9 +154,10 @@
   --atmosphere-size: auto;
   --chrome-rule: 1px solid rgba(230, 223, 208, 0.22);
 
-  --fold-paper: #1c2230;
-  --fold-paper-vig-inner: rgba(40, 48, 64, 0.5);
-  --fold-paper-vig-outer: rgba(0, 0, 0, 0.45);
+  /* Drawing sheet stays light so ink/strokes stay readable; chrome uses --paper */
+  --fold-paper: #f4efe3;
+  --fold-paper-vig-inner: rgba(255, 250, 235, 0.4);
+  --fold-paper-vig-outer: rgba(160, 130, 80, 0.2);
 
   --overlay-scrim: rgba(4, 6, 10, 0.82);
 }
@@ -203,9 +204,10 @@
   --atmosphere-size: auto;
   --chrome-rule: 2px dashed rgba(240, 240, 228, 0.4);
 
-  --fold-paper: #2a4030;
-  --fold-paper-vig-inner: rgba(60, 80, 65, 0.4);
-  --fold-paper-vig-outer: rgba(10, 20, 12, 0.35);
+  /* Drawing sheet stays light so ink/strokes stay readable; chrome uses --paper */
+  --fold-paper: #f4efe3;
+  --fold-paper-vig-inner: rgba(255, 250, 235, 0.4);
+  --fold-paper-vig-outer: rgba(160, 130, 80, 0.2);
 
   --overlay-scrim: rgba(8, 16, 10, 0.8);
 }
