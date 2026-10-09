@@ -1,6 +1,8 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import type { Bridge, GameState } from '@rfgames/shared';
 import { getValidMoves } from '@rfgames/shared';
+import { MAP_MATERIALS, type MapMaterials, type ThemeId } from '../theme/themes';
+import { useTheme } from '../theme/useTheme';
 
 interface Props {
   game: GameState;
@@ -12,7 +14,12 @@ function cellCenter(c: number, r: number, cs: number) {
   return { x: c * cs + cs / 2, y: r * cs + cs / 2 };
 }
 
-function drawBridgeLines(ctx: CanvasRenderingContext2D, bridges: Bridge[], cs: number) {
+function drawBridgeLines(
+  ctx: CanvasRenderingContext2D,
+  bridges: Bridge[],
+  cs: number,
+  mat: MapMaterials,
+) {
   ctx.save();
   ctx.setLineDash([7, 5]);
   ctx.lineCap = 'round';
@@ -21,14 +28,14 @@ function drawBridgeLines(ctx: CanvasRenderingContext2D, bridges: Bridge[], cs: n
     const a = cellCenter(bridge.cellA.c, bridge.cellA.r, cs);
     const b = cellCenter(bridge.cellB.c, bridge.cellB.r, cs);
 
-    ctx.strokeStyle = 'rgba(14, 80, 70, 0.4)';
+    ctx.strokeStyle = mat.bridgeSoft;
     ctx.lineWidth = 5;
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
     ctx.lineTo(b.x, b.y);
     ctx.stroke();
 
-    ctx.strokeStyle = 'rgba(40, 120, 100, 0.7)';
+    ctx.strokeStyle = mat.bridgeStrong;
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
@@ -44,6 +51,7 @@ function drawBridgeEndpoints(
   bridges: Bridge[],
   game: GameState,
   cs: number,
+  mat: MapMaterials,
 ) {
   const seen = new Set<string>();
 
@@ -63,37 +71,46 @@ function drawBridgeEndpoints(
       const y = pos.r * cs;
       const blocked = cell.owner !== null;
 
-      ctx.fillStyle = blocked ? 'rgba(100, 90, 70, 0.35)' : 'rgba(45, 110, 90, 0.28)';
+      ctx.fillStyle = blocked ? mat.bridgeEndpointBlocked : mat.bridgeEndpointOpen;
       ctx.fillRect(x + 2, y + 2, cs - 4, cs - 4);
 
-      ctx.strokeStyle = blocked ? 'rgba(100, 90, 70, 0.9)' : 'rgba(30, 90, 70, 0.95)';
+      ctx.strokeStyle = blocked
+        ? mat.bridgeEndpointBlockedStroke
+        : mat.bridgeEndpointOpenStroke;
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 3]);
       ctx.strokeRect(x + 1.5, y + 1.5, cs - 3, cs - 3);
       ctx.setLineDash([]);
 
-      ctx.fillStyle = blocked ? '#6b5a40' : '#1a4a3a';
+      ctx.fillStyle = blocked ? mat.bridgeEndpointBlockedDot : mat.bridgeEndpointOpenDot;
       ctx.beginPath();
       ctx.arc(x + cs / 2, y + cs / 2, cs * 0.18, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.font = `bold ${Math.max(10, cs * 0.32)}px "Archivo Black", sans-serif`;
+      ctx.font = `bold ${Math.max(10, cs * 0.32)}px ${mat.displayFont}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = blocked ? '#5a4a30' : '#1a3d30';
+      ctx.fillStyle = blocked
+        ? mat.bridgeEndpointBlockedLabel
+        : mat.bridgeEndpointOpenLabel;
       ctx.fillText(`→${targetIsland}`, x + cs / 2, y + cs - cs * 0.18);
     }
   }
 }
 
-function drawBridgeLabels(ctx: CanvasRenderingContext2D, bridges: Bridge[], cs: number) {
+function drawBridgeLabels(
+  ctx: CanvasRenderingContext2D,
+  bridges: Bridge[],
+  cs: number,
+  mat: MapMaterials,
+) {
   for (const bridge of bridges) {
     const a = cellCenter(bridge.cellA.c, bridge.cellA.r, cs);
     const b = cellCenter(bridge.cellB.c, bridge.cellB.r, cs);
     const mx = (a.x + b.x) / 2;
     const my = (a.y + b.y) / 2;
 
-    ctx.font = `600 ${Math.max(10, cs * 0.28)}px "IBM Plex Sans", sans-serif`;
+    ctx.font = `600 ${Math.max(10, cs * 0.28)}px ${mat.uiFont}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
@@ -105,13 +122,13 @@ function drawBridgeLabels(ctx: CanvasRenderingContext2D, bridges: Bridge[], cs: 
     const lx = mx - w / 2;
     const ly = my - h / 2;
 
-    ctx.fillStyle = 'rgba(232, 217, 184, 0.92)';
-    ctx.strokeStyle = 'rgba(90, 60, 30, 0.45)';
+    ctx.fillStyle = mat.labelBg;
+    ctx.strokeStyle = mat.labelStroke;
     ctx.lineWidth = 1;
     ctx.fillRect(lx, ly, w, h);
     ctx.strokeRect(lx, ly, w, h);
 
-    ctx.fillStyle = '#2a1c10';
+    ctx.fillStyle = mat.labelInk;
     ctx.fillText(label, mx, my);
   }
 }
@@ -148,6 +165,7 @@ function pointerMidpoint(
 }
 
 export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
+  const { theme } = useTheme();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const panRef = useRef({
@@ -170,6 +188,8 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
   const parchmentRef = useRef<HTMLImageElement | null>(null);
   const mapCacheRef = useRef<HTMLCanvasElement | null>(null);
   const mapCacheKeyRef = useRef('');
+  const themeRef = useRef<ThemeId>(theme);
+  themeRef.current = theme;
   const rafPanRef = useRef<number | null>(null);
   const [parchmentReady, setParchmentReady] = useState(0);
   const gameRef = useRef(game);
@@ -185,10 +205,11 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
   }, []);
 
   const rebuildMapCache = useCallback((g: GameState) => {
+    const mat = MAP_MATERIALS[themeRef.current];
     const cs = g.cellSize;
     const mapW = g.gridCols * cs;
     const mapH = g.gridRows * cs;
-    const key = ownershipSignature(g);
+    const key = `${themeRef.current}|${ownershipSignature(g)}`;
 
     let cache = mapCacheRef.current;
     if (!cache || cache.width !== mapW || cache.height !== mapH) {
@@ -206,24 +227,29 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
     mapCacheKeyRef.current = key;
 
     const parchment = parchmentRef.current;
-    if (parchment?.complete) {
+    if (mat.useParchmentTexture && parchment?.complete) {
       const pattern = ctx.createPattern(parchment, 'repeat');
       if (pattern) {
         ctx.fillStyle = pattern;
         ctx.fillRect(0, 0, mapW, mapH);
-        ctx.fillStyle = 'rgba(230, 213, 181, 0.28)';
+        ctx.fillStyle = mat.waterTint;
         ctx.fillRect(0, 0, mapW, mapH);
       } else {
-        ctx.fillStyle = '#e6d5b5';
+        ctx.fillStyle = mat.waterFallback;
         ctx.fillRect(0, 0, mapW, mapH);
       }
     } else {
-      ctx.fillStyle = '#e6d5b5';
+      ctx.fillStyle = mat.waterFallback;
       ctx.fillRect(0, 0, mapW, mapH);
+      if (!mat.useParchmentTexture) {
+        ctx.fillStyle = mat.waterTint;
+        ctx.fillRect(0, 0, mapW, mapH);
+      }
     }
 
-    ctx.strokeStyle = 'rgba(55, 35, 15, 0.7)';
-    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = mat.grid;
+    ctx.lineWidth = mat.landStyle === 'chart' ? 1 : 1.4;
+    if (mat.gridDash) ctx.setLineDash(mat.gridDash);
     for (let x = 0; x <= mapW; x += cs) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
@@ -236,8 +262,9 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
       ctx.lineTo(mapW, y);
       ctx.stroke();
     }
+    ctx.setLineDash([]);
 
-    drawBridgeLines(ctx, g.bridges, cs);
+    drawBridgeLines(ctx, g.bridges, cs, mat);
 
     for (let r = 0; r < g.gridRows; r++) {
       for (let c = 0; c < g.gridCols; c++) {
@@ -247,20 +274,35 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
         const x = c * cs;
         const y = r * cs;
 
-        ctx.fillStyle =
-          cell.owner !== null
-            ? `${g.players.find((p) => p.id === cell.owner)?.color ?? '#999'}66`
-            : 'rgba(120, 140, 90, 0.45)';
-        ctx.fillRect(x + 1, y + 1, cs - 2, cs - 2);
+        if (cell.owner !== null) {
+          ctx.fillStyle = `${g.players.find((p) => p.id === cell.owner)?.color ?? '#999'}66`;
+        } else {
+          ctx.fillStyle = mat.landUnclaimed;
+        }
 
-        ctx.strokeStyle = 'rgba(60, 45, 25, 0.75)';
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(x, y, cs, cs);
+        if (mat.landStyle === 'chalk') {
+          ctx.fillRect(x + 2, y + 2, cs - 4, cs - 4);
+          ctx.strokeStyle = mat.landStroke;
+          ctx.lineWidth = 1.2;
+          ctx.setLineDash([2, 3]);
+          ctx.strokeRect(x + 1, y + 1, cs - 2, cs - 2);
+          ctx.setLineDash([]);
+        } else if (mat.landStyle === 'chart') {
+          ctx.fillRect(x + 1, y + 1, cs - 2, cs - 2);
+          ctx.strokeStyle = mat.landStroke;
+          ctx.lineWidth = 1.2;
+          ctx.strokeRect(x + 0.5, y + 0.5, cs - 1, cs - 1);
+        } else {
+          ctx.fillRect(x + 1, y + 1, cs - 2, cs - 2);
+          ctx.strokeStyle = mat.landStroke;
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(x, y, cs, cs);
+        }
       }
     }
 
-    drawBridgeEndpoints(ctx, g.bridges, g, cs);
-    drawBridgeLabels(ctx, g.bridges, cs);
+    drawBridgeEndpoints(ctx, g.bridges, g, cs, mat);
+    drawBridgeLabels(ctx, g.bridges, cs, mat);
 
     return cache;
   }, []);
@@ -278,6 +320,7 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
     if (!ctx) return;
 
     const g = gameRef.current;
+    const mat = MAP_MATERIALS[themeRef.current];
     const cs = g.cellSize;
     const offsetX = panRef.current.x;
     const offsetY = panRef.current.y;
@@ -294,7 +337,7 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    ctx.fillStyle = '#4a5648';
+    ctx.fillStyle = mat.viewport;
     ctx.fillRect(0, 0, w, h);
 
     const cache = rebuildMapCache(g);
@@ -310,9 +353,9 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
       for (const m of valid) {
         const x = m.c * cs;
         const y = m.r * cs;
-        ctx.fillStyle = m.isBridgeTarget ? 'rgba(45, 110, 90, 0.4)' : `${player.color}40`;
+        ctx.fillStyle = m.isBridgeTarget ? mat.validBridgeFill : `${player.color}40`;
         ctx.fillRect(x + 2, y + 2, cs - 4, cs - 4);
-        ctx.strokeStyle = m.isBridgeTarget ? '#1a4a3a' : player.color;
+        ctx.strokeStyle = m.isBridgeTarget ? mat.validBridgeStroke : player.color;
         ctx.lineWidth = m.isBridgeTarget ? 3 : 2;
         ctx.strokeRect(x + 2, y + 2, cs - 4, cs - 4);
       }
@@ -393,7 +436,7 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
   useEffect(() => {
     mapCacheKeyRef.current = '';
     draw();
-  }, [game, draw, parchmentReady]);
+  }, [game, draw, parchmentReady, theme]);
 
   useEffect(() => {
     return () => {
@@ -580,7 +623,7 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
         <button
           type="button"
           onClick={() => zoomBy(0.12)}
-          className="w-11 h-11 flex items-center justify-center text-3xl leading-none hand-title bg-[#e8d9b8] border-2 border-[#5a4020] text-[#5c1818] shadow-lg hover:bg-[#f0e4c8] active:scale-95 transition"
+          className="map-zoom-btn"
           aria-label="Yakınlaştır"
         >
           +
@@ -588,7 +631,7 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
         <button
           type="button"
           onClick={() => zoomBy(-0.12)}
-          className="w-11 h-11 flex items-center justify-center text-3xl leading-none hand-title bg-[#e8d9b8] border-2 border-[#5a4020] text-[#5c1818] shadow-lg hover:bg-[#f0e4c8] active:scale-95 transition"
+          className="map-zoom-btn"
           aria-label="Uzaklaştır"
         >
           −
@@ -596,7 +639,7 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
         <button
           type="button"
           onClick={fitMapToView}
-          className="w-11 h-11 flex items-center justify-center text-xl leading-none hand-title bg-[#e8d9b8] border-2 border-[#5a4020] text-[#5c1818] shadow-lg hover:bg-[#f0e4c8] active:scale-95 transition"
+          className="map-zoom-btn"
           title="Haritayı sığdır"
           aria-label="Sığdır"
         >

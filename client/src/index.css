@@ -1,24 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  /* mürekkep damgası / okul defteri */
-  --paper: #ede6d9;
-  --ink: #141210;
-  --ink-soft: #141210;
-  --stamp: #e23d12;
-  --forest: #2f5d50;
-  --line: rgba(20, 18, 16, 0.18);
-
-  /* Back-compat aliases used in JSX / older chrome */
-  --oxblood: var(--stamp);
-  --parchment: var(--paper);
-  --parchment-deep: #e2d9c8;
-  --parchment-edge: rgba(20, 18, 16, 0.35);
-  --oak: var(--ink);
-  --brass: var(--ink);
-  --brass-bright: var(--stamp);
-  --smoke: var(--ink);
-
+  /* Spacing + type scale (colors / chrome / fonts live in theme/themes.css) */
   --space-1: 0.25rem;
   --space-1_5: 0.375rem;
   --space-2: 0.5rem;
@@ -28,20 +11,11 @@
 
   --touch-min: 2.75rem;
 
-  --font-display: "Archivo Black", "Arial Black", Impact, sans-serif;
-  --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --text-label: 0.8125rem;
   --text-body: 1rem;
   --text-card: 1.125rem;
   --text-title: 1.5rem;
   --text-display: 2.25rem;
-
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --border-quiet: 2px solid var(--line);
-  --border-strong: 2px solid var(--ink);
-  --shadow-panel: none;
-  --shadow-lift: none;
 }
 
 html,
@@ -1147,13 +1121,13 @@ body {
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #c93410;
-  border-color: #c93410;
+  background: var(--stamp-deep);
+  border-color: var(--stamp-deep);
 }
 
 .btn-primary:active:not(:disabled) {
-  background: #b02e0e;
-  border-color: #b02e0e;
+  background: var(--stamp-deeper);
+  border-color: var(--stamp-deeper);
 }
 
 .btn-primary:disabled {
@@ -1176,8 +1150,8 @@ body {
 }
 
 .btn-success:hover:not(:disabled) {
-  background: #274e43;
-  border-color: #274e43;
+  background: var(--forest-deep);
+  border-color: var(--forest-deep);
 }
 
 .btn-success:disabled {

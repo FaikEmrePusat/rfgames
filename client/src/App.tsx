@@ -8,11 +8,13 @@ import { useLocalGame } from './hooks/useLocalGame';
 import { useOnlineGame } from './hooks/useOnlineGame';
 import { useLocalFoldDraw } from './hooks/useLocalFoldDraw';
 import { useOnlineFoldDraw } from './hooks/useOnlineFoldDraw';
+import { useTheme } from './theme/useTheme';
 
 type AppMode = 'hub' | 'kapmaca' | 'fold';
 
 export default function App() {
   const [mode, setMode] = useState<AppMode>('hub');
+  const { theme, setTheme } = useTheme();
   const local = useLocalGame();
   const online = useOnlineGame();
   const fold = useLocalFoldDraw();
@@ -105,6 +107,8 @@ export default function App() {
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {mode === 'hub' && (
           <HubScreen
+            theme={theme}
+            onThemeChange={setTheme}
             onPickKapmaca={goKapmacaLobby}
             onPickFoldDraw={() => {
               local.leaveGame();
@@ -280,6 +284,8 @@ export default function App() {
           <>
             {online.error && <p className="lobby-error shrink-0 px-3 pt-1">{online.error}</p>}
             <LobbyScreen
+              theme={theme}
+              onThemeChange={setTheme}
               onStartLocal={local.startGame}
               onCreateOnline={online.createRoom}
               onJoinOnline={online.joinRoom}

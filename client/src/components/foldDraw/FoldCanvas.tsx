@@ -7,6 +7,7 @@ import {
   clampPointToSection,
   peekBounds,
 } from '@rfgames/shared';
+import { useTheme } from '../../theme/useTheme';
 import { compositeStrokeOnto, type PenKind, type StrokePoint } from './penStyles';
 
 export type FoldTool = 'pen' | 'eraser';
@@ -72,6 +73,7 @@ export function FoldCanvas({
   onCommitLayer,
   onRevealSettled,
 }: Props) {
+  const { theme } = useTheme();
   const displayRef = useRef<HTMLCanvasElement>(null);
   const layerRef = useRef<HTMLCanvasElement | null>(null);
   const scratchRef = useRef<HTMLCanvasElement | null>(null);
@@ -180,11 +182,17 @@ export function FoldCanvas({
     ctx.clearRect(0, 0, w, h);
 
     const fillPaper = () => {
-      ctx.fillStyle = '#f3e6c9';
+      const styles = getComputedStyle(document.documentElement);
+      const paper = styles.getPropertyValue('--fold-paper').trim() || '#f3e6c9';
+      const vigInner =
+        styles.getPropertyValue('--fold-paper-vig-inner').trim() || 'rgba(255,250,235,0.4)';
+      const vigOuter =
+        styles.getPropertyValue('--fold-paper-vig-outer').trim() || 'rgba(160,130,80,0.2)';
+      ctx.fillStyle = paper;
       ctx.fillRect(0, 0, w, h);
       const vig = ctx.createRadialGradient(w * 0.5, h * 0.45, w * 0.15, w * 0.5, h * 0.5, w * 0.9);
-      vig.addColorStop(0, 'rgba(255,250,235,0.4)');
-      vig.addColorStop(1, 'rgba(160,130,80,0.2)');
+      vig.addColorStop(0, vigInner);
+      vig.addColorStop(1, vigOuter);
       ctx.fillStyle = vig;
       ctx.fillRect(0, 0, w, h);
     };
@@ -328,7 +336,7 @@ export function FoldCanvas({
     ctx.fillStyle = 'rgba(42,28,16,0.6)';
     ctx.font = `700 ${Math.round(18 * (w / 400))}px "Archivo Black", sans-serif`;
     ctx.fillText(FOLD_SECTION_LABELS[section], 12, h - 14);
-  }, [game, inkWidth, tool]);
+  }, [game, inkWidth, tool, theme]);
 
   paintRef.current = paint;
 

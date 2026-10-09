@@ -7,6 +7,8 @@ import {
   getGridDimensions,
   getIslandCount,
 } from '@rfgames/shared';
+import { ThemePicker } from '../theme/ThemePicker';
+import type { ThemeId } from '../theme/themes';
 
 type Screen = 'lobby' | 'online';
 
@@ -15,6 +17,8 @@ interface Props {
   onCreateOnline: (opts: OnlineLobbyOptions) => void;
   onJoinOnline: (code: string, name: string) => void;
   onBack?: () => void;
+  theme?: ThemeId;
+  onThemeChange?: (theme: ThemeId) => void;
 }
 
 export interface OnlineLobbyOptions {
@@ -40,7 +44,14 @@ const DEFAULT_SLOTS: LocalSlot[] = [
   { name: 'Bot', kind: 'bot', difficulty: 'medium' },
 ];
 
-export function LobbyScreen({ onStartLocal, onCreateOnline, onJoinOnline, onBack }: Props) {
+export function LobbyScreen({
+  onStartLocal,
+  onCreateOnline,
+  onJoinOnline,
+  onBack,
+  theme,
+  onThemeChange,
+}: Props) {
   const [screen, setScreen] = useState<Screen>('lobby');
   const [playerCount, setPlayerCount] = useState(2);
   const [mapSize, setMapSize] = useState<MapSize>('medium');
@@ -133,6 +144,12 @@ export function LobbyScreen({ onStartLocal, onCreateOnline, onJoinOnline, onBack
           )}
           <h2 className="lobby-heading">Kare Kapmaca</h2>
           <p className="lobby-sub">zar at, ada kap — sonra köprü</p>
+
+          {theme && onThemeChange && (
+            <div className="lobby-theme-slot">
+              <ThemePicker theme={theme} onChange={onThemeChange} />
+            </div>
+          )}
 
           <div className="tab-rail">
             <button
