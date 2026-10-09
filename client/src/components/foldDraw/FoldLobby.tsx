@@ -110,59 +110,67 @@ export function FoldLobby({
 
           {screen === 'lobby' ? (
             <>
-              <label className="section-label">Oyuncu (2–4)</label>
-              <div className="grid grid-cols-3 gap-1.5 mb-3">
-                {[2, 3, 4].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setPlayerCount(n)}
-                    className={`option-btn ${playerCount === n ? 'option-btn-active' : 'option-btn-idle'}`}
-                  >
-                    {n}
-                  </button>
-                ))}
+              <div className="lobby-field">
+                <label className="section-label">Oyuncu (2–4)</label>
+                <div className="lobby-option-grid lobby-option-grid--3">
+                  {[2, 3, 4].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setPlayerCount(n)}
+                      className={`option-btn ${playerCount === n ? 'option-btn-active' : 'option-btn-idle'}`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <label className="section-label">İsimler</label>
-              <div className="lobby-slots">
-                {Array.from({ length: playerCount }).map((_, i) => (
-                  <input
-                    key={i}
-                    type="text"
-                    value={names[i]}
-                    onChange={(e) => updateName(i, e.target.value)}
-                    className="ink-input slot-name-input"
-                    placeholder={`${i + 1}. oyuncu`}
-                  />
-                ))}
+              <div className="lobby-field lobby-field--seats">
+                <label className="section-label">İsimler</label>
+                <div className="lobby-slots lobby-slots--names">
+                  {Array.from({ length: playerCount }).map((_, i) => (
+                    <input
+                      key={i}
+                      type="text"
+                      value={names[i]}
+                      onChange={(e) => updateName(i, e.target.value)}
+                      className="ink-input slot-name-input"
+                      placeholder={`${i + 1}. oyuncu`}
+                    />
+                  ))}
+                </div>
               </div>
             </>
           ) : (
             <>
-              <label className="section-label">Adınız</label>
-              <input
-                type="text"
-                value={onlineName}
-                onChange={(e) => setOnlineName(e.target.value)}
-                className="ink-input mb-3"
-              />
-
-              <label className="section-label">Oda kapasitesi (2–4)</label>
-              <div className="grid grid-cols-3 gap-1.5">
-                {([2, 3, 4] as const).map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setOnlineMax(n)}
-                    className={`option-btn ${onlineMax === n ? 'option-btn-active' : 'option-btn-idle'}`}
-                  >
-                    {n}
-                  </button>
-                ))}
+              <div className="lobby-field">
+                <label className="section-label">Adınız</label>
+                <input
+                  type="text"
+                  value={onlineName}
+                  onChange={(e) => setOnlineName(e.target.value)}
+                  className="ink-input"
+                />
               </div>
-              <p className="lobby-hint">Mühür kodunu paylaş; host oyunu başlatır.</p>
-              {onlineError && <p className="lobby-error">{onlineError}</p>}
+
+              <div className="lobby-field">
+                <label className="section-label">Oda kapasitesi (2–4)</label>
+                <div className="lobby-option-grid lobby-option-grid--3">
+                  {([2, 3, 4] as const).map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setOnlineMax(n)}
+                      className={`option-btn ${onlineMax === n ? 'option-btn-active' : 'option-btn-idle'}`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+                <p className="lobby-hint">Mühür kodunu paylaş; host oyunu başlatır.</p>
+                {onlineError && <p className="lobby-error">{onlineError}</p>}
+              </div>
             </>
           )}
         </div>

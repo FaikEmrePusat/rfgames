@@ -151,125 +151,137 @@ export function LobbyScreen({ onStartLocal, onCreateOnline, onJoinOnline, onBack
             </button>
           </div>
 
-          <label className="section-label">Harita</label>
-          <div className="grid grid-cols-3 gap-1.5 mb-1">
-            {(['small', 'medium', 'large'] as MapSize[]).map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={() => setMapSize(size)}
-                className={`option-btn ${mapSize === size ? 'option-btn-active' : 'option-btn-idle'}`}
-              >
-                {MAP_SIZE_LABELS[size]}
-              </button>
-            ))}
+          <div className="lobby-field">
+            <div className="lobby-field__head">
+              <label className="section-label">Harita</label>
+              <p className="lobby-meta" aria-live="polite">
+                ≈ {grid.cols}×{grid.rows} · ~{islands} ada
+              </p>
+            </div>
+            <div className="lobby-option-grid lobby-option-grid--3">
+              {(['small', 'medium', 'large'] as MapSize[]).map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setMapSize(size)}
+                  className={`option-btn ${mapSize === size ? 'option-btn-active' : 'option-btn-idle'}`}
+                >
+                  {MAP_SIZE_LABELS[size]}
+                </button>
+              ))}
+            </div>
           </div>
-          <p className="lobby-meta">
-            ≈ {grid.cols}×{grid.rows} · ~{islands} ada
-          </p>
 
           {screen === 'lobby' ? (
             <>
-              <label className="section-label">Oyuncu</label>
-              <div className="grid grid-cols-5 gap-1.5 mb-3">
-                {[2, 3, 4, 5, 6].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setPlayerCount(n)}
-                    className={`option-btn ${playerCount === n ? 'option-btn-active' : 'option-btn-idle'}`}
-                  >
-                    {n}
-                  </button>
-                ))}
+              <div className="lobby-field">
+                <label className="section-label">Oyuncu</label>
+                <div className="lobby-option-grid lobby-option-grid--5">
+                  {[2, 3, 4, 5, 6].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setPlayerCount(n)}
+                      className={`option-btn ${playerCount === n ? 'option-btn-active' : 'option-btn-idle'}`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <label className="section-label">Koltuklar</label>
-              <div className="lobby-slots">
-                {Array.from({ length: playerCount }).map((_, i) => {
-                  const slot = slots[i]!;
-                  return (
-                    <div key={i} className="lobby-slot">
-                      <input
-                        type="text"
-                        value={slot.name}
-                        onChange={(e) => updateSlot(i, { name: e.target.value })}
-                        className="ink-input slot-name-input"
-                        placeholder={`${i + 1}. oyuncu`}
-                        aria-label={`${i + 1}. oyuncu adı`}
-                      />
-                      <div className="lobby-slot__row">
-                        <button
-                          type="button"
-                          onClick={() => updateSlot(i, { kind: 'human' })}
-                          className={`option-btn px-2.5 py-1 text-sm ${
-                            slot.kind === 'human' ? 'option-btn-active' : 'option-btn-idle'
-                          }`}
-                        >
-                          İnsan
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => updateSlot(i, { kind: 'bot' })}
-                          className={`option-btn px-2.5 py-1 text-sm ${
-                            slot.kind === 'bot' ? 'option-btn-active' : 'option-btn-idle'
-                          }`}
-                        >
-                          Bot
-                        </button>
-                        {slot.kind === 'bot' && (
-                          <select
-                            value={slot.difficulty}
-                            onChange={(e) =>
-                              updateSlot(i, { difficulty: e.target.value as BotDifficulty })
-                            }
-                            className="ink-input slot-diff-select"
-                            aria-label="Bot zorluğu"
+              <div className="lobby-field lobby-field--seats">
+                <label className="section-label">Koltuklar</label>
+                <div className="lobby-slots">
+                  {Array.from({ length: playerCount }).map((_, i) => {
+                    const slot = slots[i]!;
+                    return (
+                      <div key={i} className="lobby-slot">
+                        <input
+                          type="text"
+                          value={slot.name}
+                          onChange={(e) => updateSlot(i, { name: e.target.value })}
+                          className="ink-input slot-name-input"
+                          placeholder={`${i + 1}. oyuncu`}
+                          aria-label={`${i + 1}. oyuncu adı`}
+                        />
+                        <div className="lobby-slot__controls" role="group" aria-label={`${i + 1}. koltuk türü`}>
+                          <button
+                            type="button"
+                            onClick={() => updateSlot(i, { kind: 'human' })}
+                            className={`option-btn lobby-slot__kind ${
+                              slot.kind === 'human' ? 'option-btn-active' : 'option-btn-idle'
+                            }`}
                           >
-                            {(['easy', 'medium', 'hard'] as BotDifficulty[]).map((d) => (
-                              <option key={d} value={d}>
-                                {BOT_DIFFICULTY_LABELS[d]}
-                              </option>
-                            ))}
-                          </select>
-                        )}
+                            İnsan
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateSlot(i, { kind: 'bot' })}
+                            className={`option-btn lobby-slot__kind ${
+                              slot.kind === 'bot' ? 'option-btn-active' : 'option-btn-idle'
+                            }`}
+                          >
+                            Bot
+                          </button>
+                          {slot.kind === 'bot' && (
+                            <select
+                              value={slot.difficulty}
+                              onChange={(e) =>
+                                updateSlot(i, { difficulty: e.target.value as BotDifficulty })
+                              }
+                              className="ink-input slot-diff-select"
+                              aria-label="Bot zorluğu"
+                            >
+                              {(['easy', 'medium', 'hard'] as BotDifficulty[]).map((d) => (
+                                <option key={d} value={d}>
+                                  {BOT_DIFFICULTY_LABELS[d]}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+                <p className="lobby-hint">Tek kişi için diğer koltukları bot yap.</p>
               </div>
-              <p className="lobby-hint">Tek kişi için diğer koltukları bot yap.</p>
             </>
           ) : (
             <>
-              <label className="section-label">Adınız</label>
-              <input
-                type="text"
-                value={onlineName}
-                onChange={(e) => setOnlineName(e.target.value)}
-                className="ink-input mb-3"
-              />
+              <div className="lobby-field">
+                <label className="section-label">Adınız</label>
+                <input
+                  type="text"
+                  value={onlineName}
+                  onChange={(e) => setOnlineName(e.target.value)}
+                  className="ink-input"
+                />
+              </div>
 
-              <label className="section-label">Oda kapasitesi</label>
-              <div className="grid grid-cols-6 gap-1.5">
-                {[2, 3, 4, 5, 6].map((n) => (
+              <div className="lobby-field">
+                <label className="section-label">Oda kapasitesi</label>
+                <div className="lobby-option-grid lobby-option-grid--6">
+                  {[2, 3, 4, 5, 6].map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setOnlineMax(n)}
+                      className={`option-btn ${onlineMax === n ? 'option-btn-active' : 'option-btn-idle'}`}
+                    >
+                      {n}
+                    </button>
+                  ))}
                   <button
-                    key={n}
                     type="button"
-                    onClick={() => setOnlineMax(n)}
-                    className={`option-btn ${onlineMax === n ? 'option-btn-active' : 'option-btn-idle'}`}
+                    onClick={() => setOnlineMax('unlimited')}
+                    className={`option-btn ${onlineMax === 'unlimited' ? 'option-btn-active' : 'option-btn-idle'}`}
+                    title="Sınırsız"
                   >
-                    {n}
+                    ∞
                   </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={() => setOnlineMax('unlimited')}
-                  className={`option-btn ${onlineMax === 'unlimited' ? 'option-btn-active' : 'option-btn-idle'}`}
-                  title="Sınırsız"
-                >
-                  ∞
-                </button>
+                </div>
               </div>
             </>
           )}
