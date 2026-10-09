@@ -20,6 +20,8 @@ export interface FoldPlayer {
   id: number;
   name: string;
   color: string;
+  /** Present in online rooms — ties seat to socket member. */
+  memberId?: string;
 }
 
 export type FoldPhase = 'drawing' | 'reveal';

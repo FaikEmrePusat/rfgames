@@ -133,8 +133,11 @@ export function endTurn(room: Room, memberId: string): { ok: boolean; error?: st
   return performEndTurn(game, playerId);
 }
 
-/** Host düşerse sıradaki bağlı üyeye aktar. */
-export function transferHostIfNeeded(room: Room): boolean {
+/** Host düşerse sıradaki bağlı üyeye aktar (Kapmaca + Katla-Çiz). */
+export function transferHostIfNeeded(room: {
+  hostId: string;
+  members: RoomMember[];
+}): boolean {
   const host = room.members.find((m) => m.id === room.hostId);
   if (host?.connected) return false;
   const nextHost = room.members.find((m) => m.connected);

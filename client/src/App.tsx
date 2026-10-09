@@ -7,6 +7,7 @@ import { FoldGameScreen } from './components/foldDraw/FoldGameScreen';
 import { useLocalGame } from './hooks/useLocalGame';
 import { useOnlineGame } from './hooks/useOnlineGame';
 import { useLocalFoldDraw } from './hooks/useLocalFoldDraw';
+import { useOnlineFoldDraw } from './hooks/useOnlineFoldDraw';
 
 type AppMode = 'hub' | 'kapmaca' | 'fold';
 
@@ -15,31 +16,50 @@ export default function App() {
   const local = useLocalGame();
   const online = useOnlineGame();
   const fold = useLocalFoldDraw();
+  const foldOnline = useOnlineFoldDraw();
 
   const inLocalGame = local.game !== null;
   const inOnlineGame = online.game !== null;
   const inOnlineLobby = online.session !== null && !inOnlineGame;
-  const inFoldGame = fold.game !== null;
+  const inFoldLocalGame = fold.game !== null;
+  const inFoldOnlineGame = foldOnline.game !== null;
+  const inFoldOnlineLobby = foldOnline.session !== null && !inFoldOnlineGame;
+  const inFoldGame = inFoldLocalGame || inFoldOnlineGame;
   const inKapmaca = mode === 'kapmaca' && (inLocalGame || inOnlineGame || inOnlineLobby);
-  const inFoldLobby = mode === 'fold' && !inFoldGame;
+  const inFoldLobby =
+    mode === 'fold' && !inFoldGame && !inFoldOnlineLobby;
 
   const canReturnHome =
-    mode !== 'hub' || inLocalGame || inOnlineGame || inOnlineLobby || inFoldGame;
+    mode !== 'hub' ||
+    inLocalGame ||
+    inOnlineGame ||
+    inOnlineLobby ||
+    inFoldGame ||
+    inFoldOnlineLobby;
 
   const goHub = () => {
     if (inLocalGame) local.leaveGame();
     if (inOnlineGame || inOnlineLobby) online.leave();
-    if (inFoldGame) fold.leave();
+    if (inFoldLocalGame) fold.leave();
+    if (inFoldOnlineGame || inFoldOnlineLobby) foldOnline.leave();
     setMode('hub');
   };
 
   const goKapmacaLobby = () => {
     fold.leave();
+    foldOnline.leave();
     setMode('kapmaca');
   };
 
   const headerTitle =
-    mode === 'fold' || inFoldGame ? 'Katla-Çiz' : mode === 'kapmaca' || inKapmaca ? 'Kare Kapmaca' : 'RF Games';
+    mode === 'fold' || inFoldGame || inFoldOnlineLobby
+      ? 'Katla-Çiz'
+      : mode === 'kapmaca' || inKapmaca
+        ? 'Kare Kapmaca'
+        : 'RF Games';
+
+  const foldSeal =
+    mode === 'fold' && foldOnline.session ? foldOnline.session.roomCode : null;
 
   return (
     <div className="app-shell">
@@ -75,6 +95,12 @@ export default function App() {
                 <span className="header-seal__code">{online.session.roomCode}</span>
               </div>
             )}
+            {foldSeal && (
+              <div className="header-seal">
+                <span className="header-seal__label">mühür</span>
+                <span className="header-seal__code">{foldSeal}</span>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -86,12 +112,13 @@ export default function App() {
             onPickFoldDraw={() => {
               local.leaveGame();
               online.leave();
+              foldOnline.leave();
               setMode('fold');
             }}
           />
         )}
 
-        {mode === 'fold' && inFoldGame && fold.game && (
+        {mode === 'fold' && inFoldLocalGame && fold.game && (
           <FoldGameScreen
             game={fold.game}
             onCommitLayer={fold.commitLayer}
@@ -106,7 +133,75 @@ export default function App() {
           />
         )}
 
-        {inFoldLobby && <FoldLobby onStart={fold.startGame} onBack={goHub} />}
+        {mode === 'fold' && inFoldOnlineGame && foldOnline.game && (
+          <FoldGameScreen
+            game={foldOnline.game}
+            onCommitLayer={foldOnline.commitLayer}
+            onUndo={foldOnline.undo}
+            onFold={foldOnline.foldAndPass}
+            onLeave={goHub}
+            onNewDrawing={() => {
+              foldOnline.leave();
+              setMode('fold');
+            }}
+            canUndo={foldOnline.canUndo}
+            canDraw={foldOnline.isMyTurn}
+            foldBusy={foldOnline.submitting}
+          />
+        )}
+
+        {mode === 'fold' && inFoldOnlineLobby && foldOnline.session && (
+          <div className="lobby-shell">
+            <div className="lobby-panel">
+              <div className="lobby-panel__scroll">
+                <button type="button" onClick={foldOnline.leave} className="lobby-back">
+                  ← vazgeç
+                </button>
+                <h2 className="lobby-heading">
+                  {foldOnline.session.isHost ? 'Oyuncular bekleniyor' : 'Lobide bekleniyor'}
+                </h2>
+                <p className="lobby-sub">Bu mührü arkadaşlarınla paylaş</p>
+                <div className="lobby-online-code">{foldOnline.session.roomCode}</div>
+                <ul className="lobby-members">
+                  {foldOnline.session.members.map((m) => (
+                    <li key={m.id}>
+                      — {m.name}
+                      {m.connected === false ? ' (bağlantı yok)' : ''}
+                    </li>
+                  ))}
+                </ul>
+                {foldOnline.error && <p className="lobby-error">{foldOnline.error}</p>}
+                {!foldOnline.session.isHost && (
+                  <p className="lobby-hint">Host oyunu başlatacak…</p>
+                )}
+              </div>
+              <div className="lobby-panel__footer">
+                {foldOnline.session.isHost ? (
+                  <button
+                    type="button"
+                    onClick={foldOnline.startOnlineGame}
+                    disabled={foldOnline.session.members.length < 2}
+                    className="btn-primary"
+                  >
+                    Oyunu başlat · {foldOnline.session.members.length}
+                  </button>
+                ) : (
+                  <p className="lobby-meta mb-0">Bekleniyor…</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {inFoldLobby && (
+          <FoldLobby
+            onStart={fold.startGame}
+            onCreateOnline={foldOnline.createRoom}
+            onJoinOnline={foldOnline.joinRoom}
+            onBack={goHub}
+            onlineError={foldOnline.error}
+          />
+        )}
 
         {mode === 'kapmaca' && inLocalGame && local.game && (
           <GameScreen

@@ -19,10 +19,13 @@ interface Props {
   game: FoldGameState;
   onCommitLayer: (dataUrl: string) => void;
   onUndo: () => void;
-  onFold: () => void;
+  onFold: () => void | Promise<void>;
   onLeave: () => void;
   onNewDrawing: () => void;
   canUndo: boolean;
+  /** Online: false while waiting for another player's section. Default true (local). */
+  canDraw?: boolean;
+  foldBusy?: boolean;
 }
 
 export function FoldGameScreen({
@@ -33,6 +36,8 @@ export function FoldGameScreen({
   onLeave,
   onNewDrawing,
   canUndo,
+  canDraw: canDrawProp,
+  foldBusy = false,
 }: Props) {
   const [ink, setInk] = useState<string>(FOLD_INK_PRESETS[0]);
   const [width, setWidth] = useState(3.5);
@@ -43,7 +48,8 @@ export function FoldGameScreen({
   const artist = currentArtist(game);
   const sectionLabel = FOLD_SECTION_LABELS[game.currentSection];
   const hasInk = sectionHasInk(game);
-  const canDraw = game.phase === 'drawing';
+  const canDraw = game.phase === 'drawing' && (canDrawProp ?? true);
+  const isWaiting = game.phase === 'drawing' && !canDraw;
   const foldLabel = game.currentSection === 3 ? 'Aç' : 'Katla';
 
   const plan = useMemo(
@@ -70,7 +76,7 @@ export function FoldGameScreen({
 
   return (
     <div className="fold-game-screen">
-      {canDraw && (
+      {game.phase === 'drawing' && (
         <header className="fold-topbar">
           <div className="fold-progress" aria-label="Katlar">
             {plan.map((p) => (
@@ -85,21 +91,34 @@ export function FoldGameScreen({
             <span className="fold-topbar-section">{sectionLabel}</span>
             <span className="fold-topbar-sep">·</span>
             <span style={{ color: artist.color }}>{artist.name}</span>
+            {isWaiting && <span className="fold-topbar-sep"> · bekleniyor</span>}
           </p>
         </header>
       )}
 
       <div className="fold-stage">
-        <FoldCanvas
-          game={game}
-          inkColor={ink}
-          inkWidth={width}
-          tool={tool}
-          penKind={penKind}
-          canDraw={canDraw}
-          onCommitLayer={onCommitLayer}
-          onRevealSettled={() => setRevealSettled(true)}
-        />
+        {isWaiting ? (
+          <div className="fold-wait" role="status">
+            <p className="fold-wait__title">Kağıt katlandı</p>
+            <p className="fold-wait__body">
+              <span style={{ color: artist.color }}>{artist.name}</span>
+              {' · '}
+              {sectionLabel} çiziyor…
+            </p>
+            <p className="fold-wait__hint">Sıra sana gelince yalnızca kat izini göreceksin.</p>
+          </div>
+        ) : (
+          <FoldCanvas
+            game={game}
+            inkColor={ink}
+            inkWidth={width}
+            tool={tool}
+            penKind={penKind}
+            canDraw={canDraw}
+            onCommitLayer={onCommitLayer}
+            onRevealSettled={() => setRevealSettled(true)}
+          />
+        )}
       </div>
 
       {canDraw && (
@@ -184,10 +203,10 @@ export function FoldGameScreen({
             <button
               type="button"
               className="btn-primary fold-dock-cta"
-              onClick={onFold}
-              disabled={!hasInk}
+              onClick={() => void onFold()}
+              disabled={!hasInk || foldBusy}
             >
-              {foldLabel}
+              {foldBusy ? 'Gönderiliyor…' : foldLabel}
             </button>
           </div>
         </footer>

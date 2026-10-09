@@ -19,7 +19,7 @@ export function HubScreen({ onPickKapmaca, onPickFoldDraw }: Props) {
 
         <button type="button" onClick={onPickFoldDraw} className="hub-card hub-card--sketch">
           <h3 className="hub-card__title">Katla-Çiz</h3>
-          <p className="hub-card__blurb">Katla · çiz · aç · sürpriz</p>
+          <p className="hub-card__blurb">Katla · çiz · aç · online</p>
         </button>
       </div>
     </div>

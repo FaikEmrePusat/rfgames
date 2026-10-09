@@ -1115,6 +1115,43 @@ body {
   max-height: 100%;
 }
 
+.fold-wait {
+  width: min(100%, 22rem);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  border: 1px dashed rgba(90, 60, 30, 0.35);
+  background:
+    linear-gradient(180deg, rgba(255, 248, 230, 0.55), rgba(232, 214, 176, 0.35)),
+    repeating-linear-gradient(
+      -12deg,
+      transparent,
+      transparent 10px,
+      rgba(90, 60, 30, 0.03) 10px,
+      rgba(90, 60, 30, 0.03) 11px
+    );
+}
+
+.fold-wait__title {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  color: var(--ink);
+  margin: 0 0 0.4rem;
+}
+
+.fold-wait__body {
+  font-family: var(--font-ui);
+  font-size: 1.05rem;
+  color: var(--ink);
+  margin: 0 0 0.75rem;
+}
+
+.fold-wait__hint {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  color: rgba(42, 28, 16, 0.72);
+  margin: 0;
+}
+
 .fold-dock {
   flex-shrink: 0;
   display: flex;

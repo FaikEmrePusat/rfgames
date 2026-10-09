@@ -1,4 +1,4 @@
-import type { MapSize } from '@rfgames/shared';
+import { isValidFoldLayerDataUrl, type MapSize } from '@rfgames/shared';
 
 const MAP_SIZES = new Set<MapSize>(['small', 'medium', 'large']);
 const NAME_MAX = 24;
@@ -65,4 +65,38 @@ export function parseRejoin(raw: unknown): { code: string; memberId: string } | 
   const memberId = typeof o.memberId === 'string' && o.memberId.length >= 8 ? o.memberId : null;
   if (!code || !memberId) return null;
   return { code, memberId };
+}
+
+export function parseFoldMaxPlayers(raw: unknown): 2 | 3 | 4 | null {
+  if (typeof raw !== 'number' || !Number.isInteger(raw)) return null;
+  if (raw === 2 || raw === 3 || raw === 4) return raw;
+  return null;
+}
+
+export function parseFoldCreateRoom(raw: unknown): {
+  playerName: string;
+  maxPlayers: 2 | 3 | 4;
+} | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  const playerName = sanitizeName(o.playerName);
+  const maxPlayers = parseFoldMaxPlayers(o.maxPlayers);
+  if (!playerName || maxPlayers === null) return null;
+  return { playerName, maxPlayers };
+}
+
+/** Section + peek-safe PNG/JPEG data URLs (size-checked via shared helper). */
+export function parseFoldSubmitSection(raw: unknown): {
+  layerDataUrl: string;
+  peekSafeDataUrl: string;
+} | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  if (!isValidFoldLayerDataUrl(o.layerDataUrl) || !isValidFoldLayerDataUrl(o.peekSafeDataUrl)) {
+    return null;
+  }
+  return {
+    layerDataUrl: o.layerDataUrl,
+    peekSafeDataUrl: o.peekSafeDataUrl,
+  };
 }
