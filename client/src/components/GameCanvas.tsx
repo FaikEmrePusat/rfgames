@@ -77,7 +77,7 @@ function drawBridgeEndpoints(
       ctx.arc(x + cs / 2, y + cs / 2, cs * 0.18, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.font = `bold ${Math.max(10, cs * 0.32)}px Fraunces, serif`;
+      ctx.font = `bold ${Math.max(10, cs * 0.32)}px "Archivo Black", sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = blocked ? '#5a4a30' : '#1a3d30';
@@ -93,7 +93,7 @@ function drawBridgeLabels(ctx: CanvasRenderingContext2D, bridges: Bridge[], cs: 
     const mx = (a.x + b.x) / 2;
     const my = (a.y + b.y) / 2;
 
-    ctx.font = `600 ${Math.max(10, cs * 0.28)}px Fraunces, serif`;
+    ctx.font = `600 ${Math.max(10, cs * 0.28)}px "IBM Plex Sans", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 

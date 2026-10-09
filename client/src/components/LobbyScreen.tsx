@@ -108,7 +108,7 @@ export function LobbyScreen({ onStartLocal, onCreateOnline, onJoinOnline, onBack
             value={joinCode}
             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
             placeholder="oda kodu"
-            className="ink-input text-center uppercase tracking-[0.2em] !text-[var(--oxblood)]"
+            className="ink-input text-center uppercase tracking-[0.2em] !text-[var(--stamp)]"
             aria-label="Oda kodu"
           />
           <button
@@ -132,7 +132,7 @@ export function LobbyScreen({ onStartLocal, onCreateOnline, onJoinOnline, onBack
             </button>
           )}
           <h2 className="lobby-heading">Kare Kapmaca</h2>
-          <p className="lobby-sub">Zar · ada · köprü</p>
+          <p className="lobby-sub">zar at, ada kap — sonra köprü</p>
 
           <div className="tab-rail">
             <button

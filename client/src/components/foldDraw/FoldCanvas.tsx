@@ -326,7 +326,7 @@ export function FoldCanvas({
     }
 
     ctx.fillStyle = 'rgba(42,28,16,0.6)';
-    ctx.font = `700 ${Math.round(18 * (w / 400))}px Fraunces, serif`;
+    ctx.font = `700 ${Math.round(18 * (w / 400))}px "Archivo Black", sans-serif`;
     ctx.fillText(FOLD_SECTION_LABELS[section], 12, h - 14);
   }, [game, inkWidth, tool]);
 

@@ -63,47 +63,44 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <header className="site-header sticky top-0 z-40">
-        <div className="site-header__inner">
-          <div className="min-w-0">
-            {canReturnHome && mode !== 'hub' ? (
-              <button
-                type="button"
-                onClick={goHub}
-                className="site-header__brand text-left"
-                title="Oyun seçimine dön"
-              >
-                <h1 className="hand-title text-3xl sm:text-4xl truncate leading-none">{headerTitle}</h1>
-                <p className="hand-note text-sm mt-1">← oyun seçimi</p>
-              </button>
-            ) : (
-              <>
-                <h1 className="hand-title text-3xl sm:text-4xl truncate leading-none">{headerTitle}</h1>
-                <p className="hand-note text-sm mt-1">Masaüstü oyunlar</p>
-              </>
-            )}
-          </div>
-          <div className="flex items-end gap-3 shrink-0">
-            {mode !== 'hub' && (
+      {mode !== 'hub' && (
+        <header className="site-header sticky top-0 z-40">
+          <div className="site-header__inner">
+            <div className="min-w-0">
+              {canReturnHome ? (
+                <button
+                  type="button"
+                  onClick={goHub}
+                  className="site-header__brand text-left"
+                  title="Oyun seçimine dön"
+                >
+                  <h1 className="hand-title truncate">{headerTitle}</h1>
+                  <p className="hand-note">← masa</p>
+                </button>
+              ) : (
+                <h1 className="hand-title truncate">{headerTitle}</h1>
+              )}
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
               <button type="button" onClick={goHub} className="btn-ghost">
                 Çık
               </button>
-            )}
-            {online.session && mode === 'kapmaca' && (
-              <div className="header-seal">
-                <span className="header-seal__label">mühür</span>
-                <span className="header-seal__code">{online.session.roomCode}</span>
-              </div>
-            )}
-            {foldSeal && (
-              <div className="header-seal">
-                <span className="header-seal__label">mühür</span>
-                <span className="header-seal__code">{foldSeal}</span>
-              </div>
-            )}
+              {online.session && mode === 'kapmaca' && (
+                <div className="header-seal">
+                  <span className="header-seal__label">kod</span>
+                  <span className="header-seal__code">{online.session.roomCode}</span>
+                </div>
+              )}
+              {foldSeal && (
+                <div className="header-seal">
+                  <span className="header-seal__label">kod</span>
+                  <span className="header-seal__code">{foldSeal}</span>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {mode === 'hub' && (

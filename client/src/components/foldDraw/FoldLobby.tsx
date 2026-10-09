@@ -67,7 +67,7 @@ export function FoldLobby({
             value={joinCode}
             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
             placeholder="oda kodu"
-            className="ink-input text-center uppercase tracking-[0.2em] !text-[var(--oxblood)]"
+            className="ink-input text-center uppercase tracking-[0.2em] !text-[var(--stamp)]"
             aria-label="Oda kodu"
           />
           <button
@@ -89,7 +89,7 @@ export function FoldLobby({
             ← seçim
           </button>
           <h2 className="lobby-heading">Katla-Çiz</h2>
-          <p className="lobby-sub">4 kat · kimse tam figürü görmez</p>
+          <p className="lobby-sub">dört kat — kimse tam figürü görmez</p>
 
           <div className="tab-rail">
             <button
