@@ -12,9 +12,6 @@ import { FoldInkColorPicker } from './FoldInkColorPicker';
 import { downloadFoldPaperPng } from './exportFoldPng';
 import { FOLD_INK_PRESETS } from './foldRecentColors';
 import { PEN_KIND_LABELS, type PenKind } from './penStyles';
-import { ThemePicker } from '../../theme/ThemePicker';
-import { useTheme } from '../../theme/useTheme';
-
 const ADVANCED_PEN_KINDS: PenKind[] = ['pencil', 'marker', 'brush', 'charcoal'];
 
 interface Props {
@@ -41,7 +38,6 @@ export function FoldGameScreen({
   canDraw: canDrawProp,
   foldBusy = false,
 }: Props) {
-  const { theme, setTheme } = useTheme();
   const [ink, setInk] = useState<string>(FOLD_INK_PRESETS[0]);
   const [width, setWidth] = useState(3.5);
   const [tool, setTool] = useState<FoldTool>('pen');
@@ -103,7 +99,6 @@ export function FoldGameScreen({
             <span className="fold-topbar-section">Açılış</span>
           </p>
         )}
-        <ThemePicker theme={theme} onChange={setTheme} variant="menu" />
       </header>
 
       <div className="fold-stage">

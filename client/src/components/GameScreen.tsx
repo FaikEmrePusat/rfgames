@@ -6,9 +6,6 @@ import { PhaseBar } from './PhaseBar';
 import { PlayerScoreboard } from './PlayerScoreboard';
 import { BridgeList } from './BridgeList';
 import { DiceOverlay } from './DiceOverlay';
-import { ThemePicker } from '../theme/ThemePicker';
-import { useTheme } from '../theme/useTheme';
-
 interface Props {
   game: GameState;
   orderRollIdx: number;
@@ -53,7 +50,6 @@ export function GameScreen({
   onEndTurn,
   onLeave,
 }: Props) {
-  const { theme, setTheme } = useTheme();
   const current = game.players[game.currentPlayerIdx];
   const orderPhase = game.phase === 'roll_order';
   const actingPlayer = orderPhase ? game.players[orderRollIdx] : current;
@@ -241,7 +237,6 @@ export function GameScreen({
           </div>
 
           <div className="game-topbar__actions">
-            <ThemePicker theme={theme} onChange={setTheme} variant="menu" />
             <button
               type="button"
               className={`game-aside-toggle ${asideOpen ? 'is-on' : ''}`}

@@ -420,27 +420,17 @@
   max-width: 100%;
 }
 
-.hub-screen .theme-picker--menu {
-  margin-top: var(--space-3);
-  align-self: flex-start;
-}
-
-.lobby-theme-slot {
-  margin: var(--space-3) 0 var(--space-2);
-}
-
-.lobby-theme-slot .theme-picker--menu {
-  align-self: flex-start;
-  width: fit-content;
-}
-
-/* Compact Ortam menu (hub / lobby / in-game chrome) */
+/* Compact Ortam menu (site header) */
 .theme-picker--menu {
   position: relative;
   flex-direction: row;
   align-items: center;
   gap: 0;
   z-index: 20;
+}
+
+.site-header .theme-picker--menu {
+  flex-shrink: 0;
 }
 
 .theme-picker__trigger {
@@ -507,24 +497,9 @@
   box-shadow: var(--shadow-lift);
 }
 
-.hub-screen .theme-picker__popover,
-.lobby-theme-slot .theme-picker__popover {
-  left: 0;
-  right: auto;
-}
-
 .theme-picker__popover .theme-picker__rail {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-1_5);
-}
-
-.game-topbar__actions .theme-picker--menu {
-  order: -1;
-}
-
-.fold-topbar .theme-picker--menu {
-  margin-left: auto;
-  flex-shrink: 0;
 }
 
 /* Map zoom chrome — theme tokens */
