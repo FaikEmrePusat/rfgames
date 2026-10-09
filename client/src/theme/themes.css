@@ -8,6 +8,9 @@
   --paper: #ede6d9;
   --ink: #141210;
   --ink-soft: #141210;
+  /* Text on shell/field — same as panel ink unless a theme splits them */
+  --chrome-ink: var(--ink);
+  --chrome-ink-soft: var(--ink-soft);
   --stamp: #e23d12;
   --stamp-deep: #c93410;
   --stamp-deeper: #b02e0e;
@@ -55,6 +58,8 @@
   --paper: #d8e0e6;
   --ink: #0e2438;
   --ink-soft: #1a3a52;
+  --chrome-ink: var(--ink);
+  --chrome-ink-soft: var(--ink-soft);
   --stamp: #1a4a6e;
   --stamp-deep: #143a58;
   --stamp-deeper: #0f2f48;
@@ -117,6 +122,8 @@
   --paper: #12151c;
   --ink: #e6dfd0;
   --ink-soft: #c8c0b0;
+  --chrome-ink: var(--ink);
+  --chrome-ink-soft: var(--ink-soft);
   --stamp: #e8a84a;
   --stamp-deep: #d4923a;
   --stamp-deeper: #b87a28;
@@ -167,6 +174,8 @@
   --paper: #1e3224;
   --ink: #f0f0e4;
   --ink-soft: #d8d8c8;
+  --chrome-ink: var(--ink);
+  --chrome-ink-soft: var(--ink-soft);
   --stamp: #f5e678;
   --stamp-deep: #e0d060;
   --stamp-deeper: #c8b848;
@@ -214,9 +223,12 @@
 
 /* —— Otantik: kahvehane / eski oyun masası —— */
 [data-theme='otantik'] {
+  /* Paper panels keep dark ink; shell/hub sit on dark wood → light chrome type */
   --paper: #e8dfc8;
   --ink: #2a1f14;
   --ink-soft: #3d2e1e;
+  --chrome-ink: #f3e6c8;
+  --chrome-ink-soft: #e6d7b8;
   --stamp: #b85a2a;
   --stamp-deep: #9a4a22;
   --stamp-deeper: #7e3c1c;
@@ -248,13 +260,13 @@
   --shadow-lift: 0 2px 0 rgba(42, 31, 20, 0.1);
 
   --grain-opacity: 0.12;
-  /* Deep coffeehouse field: soft reading wash over tiled wood */
+  /* Dark coffeehouse field — type uses --chrome-ink, not a cream wash */
   --atmosphere:
-    radial-gradient(ellipse 85% 65% at 50% 30%, rgba(232, 223, 200, 0.58) 0%, transparent 58%),
-    linear-gradient(165deg, rgba(42, 28, 16, 0.45) 0%, transparent 50%),
-    linear-gradient(0deg, rgba(58, 42, 28, 0.28) 0%, transparent 40%),
+    radial-gradient(ellipse 90% 70% at 50% 18%, rgba(90, 68, 40, 0.35) 0%, transparent 55%),
+    linear-gradient(165deg, rgba(28, 18, 10, 0.55) 0%, transparent 52%),
+    linear-gradient(0deg, rgba(22, 14, 8, 0.5) 0%, transparent 42%),
     url('/themes/otantik/wood-grain.jpg'),
-    linear-gradient(180deg, #8a734f 0%, #6e5a3c 100%);
+    linear-gradient(180deg, #5c4a32 0%, #3d2e1c 100%);
   --atmosphere-size: auto, auto, auto, 220px 220px, auto;
   --chrome-rule: 3px solid var(--oak);
 
@@ -300,7 +312,8 @@
 }
 
 [data-theme='otantik'] .app-shell {
-  background: #6e5a3c;
+  background: #3d2e1c;
+  color: var(--chrome-ink);
 }
 
 [data-theme='otantik'] .app-shell::before {
@@ -424,7 +437,7 @@
 [data-theme='otantik'] .hub-screen__list,
 [data-theme='otantik'] .hub-row {
   border-bottom-width: 2px;
-  border-bottom-color: rgba(42, 31, 20, 0.22);
+  border-bottom-color: rgba(243, 230, 200, 0.28);
 }
 
 .game-end-overlay {
@@ -714,9 +727,48 @@
 }
 
 /* Chevron / diamond rule under hub kicker */
+[data-theme='otantik'] .hub-title,
+[data-theme='otantik'] .hub-row,
+[data-theme='otantik'] .hub-kicker {
+  color: var(--chrome-ink);
+  text-shadow: 0 1px 2px rgba(18, 10, 4, 0.55);
+}
+
 [data-theme='otantik'] .hub-kicker {
   opacity: 1;
-  color: color-mix(in srgb, var(--ink) 72%, transparent);
+  color: var(--chrome-ink-soft);
+}
+
+[data-theme='otantik'] .hub-row__blurb {
+  color: var(--chrome-ink-soft);
+  opacity: 1;
+  text-shadow: 0 1px 2px rgba(18, 10, 4, 0.45);
+}
+
+[data-theme='otantik'] .hub-row:hover,
+[data-theme='otantik'] .hub-row:focus-visible,
+[data-theme='otantik'] .hub-row:active {
+  color: var(--brass-bright);
+}
+
+/* Copper CTAs: dark type on stamp (cream-on-copper washed out) */
+[data-theme='otantik'] .btn-primary,
+[data-theme='otantik'] .option-btn-active {
+  color: #1a120c;
+}
+
+[data-theme='otantik'] .btn-success {
+  color: #f3e6c8;
+}
+
+/* Field chrome outside paper panels (fold play topbar, etc.) */
+[data-theme='otantik'] .fold-topbar-title,
+[data-theme='otantik'] .fold-game-screen > .btn-ghost {
+  color: var(--chrome-ink);
+}
+
+[data-theme='otantik'] .site-header {
+  color: var(--ink);
 }
 
 [data-theme='otantik'] .hub-kicker::after {

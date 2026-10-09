@@ -271,7 +271,7 @@ body {
   font-family: var(--font-ui);
   font-size: var(--text-body);
   font-weight: 500;
-  color: var(--ink);
+  color: var(--chrome-ink);
   opacity: 0.72;
   margin: var(--space-3) 0 0;
   letter-spacing: 0;
@@ -284,7 +284,7 @@ body {
   line-height: 0.92;
   letter-spacing: -0.02em;
   text-transform: uppercase;
-  color: var(--ink);
+  color: var(--chrome-ink);
   margin: 0;
 }
 
@@ -295,7 +295,7 @@ body {
   min-height: 0;
   margin-top: auto;
   padding-bottom: var(--space-2);
-  border-top: 2px solid var(--ink);
+  border-top: 2px solid var(--chrome-ink);
 }
 
 .hub-row {
@@ -305,10 +305,11 @@ body {
   display: block;
   padding: var(--space-4) 0;
   border: none;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 2px solid var(--chrome-ink);
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+  color: var(--chrome-ink);
   position: relative;
   transition: color 0.12s ease, background-color 0.12s ease;
 }
