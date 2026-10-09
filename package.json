@@ -7,7 +7,7 @@
     "server"
   ],
   "scripts": {
-    "install:all": "npm install --prefix shared --no-workspaces && npm install --prefix client --no-workspaces --install-links && npm install --prefix server --no-workspaces --install-links",
+    "install:all": "npm install --prefix shared --no-workspaces --include=dev && npm install --prefix client --no-workspaces --install-links --include=dev && npm install --prefix server --no-workspaces --install-links --include=dev",
     "install:browsers": "npm run install:browsers --prefix client --no-workspaces",
     "sync:shared": "node ./scripts/sync-shared.mjs",
     "build:shared": "npm run build --prefix shared --no-workspaces && npm run sync:shared",

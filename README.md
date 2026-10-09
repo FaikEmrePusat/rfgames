@@ -9,7 +9,7 @@ npm run install:all
 npm run build:shared
 ```
 
-> Not: Ortam symlink desteklemiyorsa kök `npm install` (workspace link) başarısız olabilir; `install:all` paketleri ayrı kurar (`--no-workspaces --install-links`) ve `build:shared` sonrası `sync:shared` kopyalar. Symlink olan sistemlerde kök `npm install` da kullanılabilir.
+> Not: Ortam symlink desteklemiyorsa kök `npm install` (workspace link) başarısız olabilir; `install:all` paketleri ayrı kurar (`--no-workspaces --install-links --include=dev`) ve `build:shared` sonrası `sync:shared` kopyalar. Symlink olan sistemlerde kök `npm install` da kullanılabilir. `--include=dev`, `NODE_ENV=production` (ör. Render) altında da TypeScript/Vite/`@types` kurulmasını sağlar.
 
 ## Çalıştırma
 
@@ -37,7 +37,7 @@ npm run build
 npm start
 ```
 
-Render: Build `npm run install:all && npm run build` · Start `npm start` · blueprint: `render.yaml`.
+Render: Build `NPM_CONFIG_PRODUCTION=false npm run install:all && npm run build` · Start `npm start` · blueprint: `render.yaml`.
 
 ## Test
 

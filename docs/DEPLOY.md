@@ -8,10 +8,12 @@ Tek **Web Service**: Express hem API/Socket.io hem `client/dist` SPA’yı sunar
 2. **Blueprint** kullanıyorsan: kökteki `render.yaml` ile “New → Blueprint”.
    - Manuel: **Web Service** → kök dizin monorepo root.
 3. Komutlar (blueprint’te de aynı):
-   - **Build:** `npm run install:all && npm run build`
+   - **Build:** `NPM_CONFIG_PRODUCTION=false npm run install:all && npm run build`
    - **Start:** `npm start`
 4. Deploy bitince URL’yi paylaş (ör. `https://rfgames.onrender.com`).
 5. Free plan uyur; ilk istekte uyanma gecikmesi normal.
+
+> **Önemli:** Render `NODE_ENV=production` ile kurulumda `devDependencies`’i atlar. Client/server build ise `typescript`, `vite`, `@types/*` ister. Blueprint `NPM_CONFIG_PRODUCTION=false` kullanır; `install:all` ayrıca `--include=dev` ile kurar.
 
 ## Ortam değişkenleri
 
@@ -33,7 +35,7 @@ npm run build
 npm start
 ```
 
-`install:all` paketleri `--install-links` ile kurar (Windows’ta `file:` symlink hatasını önler). `build:shared` ardından `sync:shared` güncel `shared/dist`’i client/server `node_modules` içine kopyalar.
+`install:all` paketleri `--install-links --include=dev` ile kurar (Windows’ta `file:` symlink hatasını önler; üretim `NODE_ENV` altında da build araçlarını getirir). `build:shared` ardından `sync:shared` güncel `shared/dist`’i client/server `node_modules` içine kopyalar.
 
 - http://localhost:3001/health → `{"ok":true}`
 - http://localhost:3001/ → SPA
