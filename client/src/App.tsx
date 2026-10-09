@@ -79,7 +79,7 @@ export default function App() {
             ) : (
               <>
                 <h1 className="hand-title text-3xl sm:text-4xl truncate leading-none">{headerTitle}</h1>
-                <p className="hand-note text-sm mt-1">RF Games · el yazması</p>
+                <p className="hand-note text-sm mt-1">Masaüstü oyunlar</p>
               </>
             )}
           </div>

@@ -61,7 +61,7 @@ export async function downloadFoldPaperPng(
   ctx.strokeRect(2, 2, w - 4, h - 4);
 
   ctx.fillStyle = 'rgba(42,28,16,0.45)';
-  ctx.font = '600 22px Kalam, cursive';
+  ctx.font = '600 22px "Source Sans 3", sans-serif';
   ctx.fillText('Katla-Çiz · RF Games', 24, h - 20);
 
   canvas.toBlob((blob) => {

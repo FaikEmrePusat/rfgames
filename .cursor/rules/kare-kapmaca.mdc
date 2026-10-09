@@ -10,4 +10,4 @@ alwaysApply: false
 - Mutations go through `turnOrchestrator` / shared rules; keep local and online aligned
 - Bots: `chooseBotClaim` difficulties easy/medium/hard; local only
 - Map: many small islands, bridges, auto-fill isolation
-- UI: parchment + Caveat/Kalam; title **Kare Kapmaca**
+- UI: parchment + Fraunces/Source Sans 3; title **Kare Kapmaca**

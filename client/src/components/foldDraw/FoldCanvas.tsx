@@ -301,7 +301,7 @@ export function FoldCanvas({
       ctx.stroke();
 
       ctx.fillStyle = 'rgba(42,28,16,0.45)';
-      ctx.font = `600 ${Math.round(13 * (w / 400))}px Kalam, cursive`;
+      ctx.font = `600 ${Math.round(13 * (w / 400))}px "Source Sans 3", sans-serif`;
       ctx.fillText('← önceki katın ucu', 12, peekTop + 18);
     }
 
@@ -326,7 +326,7 @@ export function FoldCanvas({
     }
 
     ctx.fillStyle = 'rgba(42,28,16,0.6)';
-    ctx.font = `700 ${Math.round(18 * (w / 400))}px Caveat, cursive`;
+    ctx.font = `700 ${Math.round(18 * (w / 400))}px Fraunces, serif`;
     ctx.fillText(FOLD_SECTION_LABELS[section], 12, h - 14);
   }, [game, inkWidth, tool]);
 

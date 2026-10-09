@@ -16,7 +16,7 @@ Build a cohesive multi-game site that feels handcrafted (parchment / play), not 
 3. Header “home / leave” returns to hub or game lobby consistently
 
 ## Shared UI tokens
-Reuse CSS variables in `client/src/index.css` (`--ink`, `--oxblood`, parchment panels). Improve contrast for idle controls. Prefer Kalam for UI chrome readability; Caveat for titles.
+Reuse CSS variables in `client/src/index.css` (`--ink`, `--oxblood`, parchment panels). Improve contrast for idle controls. Prefer Source Sans 3 for UI chrome; Fraunces for brand/titles.
 
 ## Online pattern (any game)
 - Client: `VITE_SERVER_URL`
