@@ -48,7 +48,7 @@ export function FoldLobby({
         Kağıdı ser
       </button>
     ) : (
-      <div className="flex flex-col gap-2 w-full">
+      <div className="lobby-footer-stack">
         <button
           type="button"
           onClick={() =>
@@ -57,23 +57,23 @@ export function FoldLobby({
               maxPlayers: onlineMax,
             })
           }
-          className="btn-primary w-full"
+          className="btn-primary"
         >
           Oda oluştur
         </button>
-        <div className="flex gap-2">
+        <div className="lobby-join-row">
           <input
             type="text"
             value={joinCode}
             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
             placeholder="oda kodu"
-            className="ink-input text-center uppercase tracking-[0.2em] !text-[var(--oxblood)] flex-1"
+            className="ink-input text-center uppercase tracking-[0.2em] !text-[var(--oxblood)]"
             aria-label="Oda kodu"
           />
           <button
             type="button"
             onClick={() => onJoinOnline(joinCode.trim(), onlineName)}
-            className="btn-success shrink-0"
+            className="btn-success"
           >
             Katıl
           </button>

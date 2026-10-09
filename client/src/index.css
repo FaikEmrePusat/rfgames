@@ -484,17 +484,55 @@ body {
 
 .lobby-panel__footer {
   flex-shrink: 0;
-  padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-2) var(--space-3) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid rgba(90, 60, 30, 0.2);
   background: rgba(248, 238, 214, 0.55);
+  /* Keep button borders inside the panel (avoid overflow:hidden clip) */
+  overflow: visible;
 }
 
 .lobby-panel__footer .btn-primary,
 .lobby-panel__footer .btn-success {
-  width: 100%;
   min-height: var(--touch-min);
   padding: var(--space-2) var(--space-3);
   font-size: var(--text-card);
+  box-sizing: border-box;
+}
+
+/* Full-width CTAs only — not the join-row Katıl button beside the code input */
+.lobby-panel__footer > .btn-primary,
+.lobby-panel__footer > .btn-success,
+.lobby-panel__footer .lobby-footer-stack > .btn-primary {
+  width: 100%;
+}
+
+.lobby-footer-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+}
+
+.lobby-join-row {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  width: 100%;
+  min-width: 0;
+}
+
+.lobby-join-row .ink-input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.lobby-join-row .btn-success {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: none;
 }
 
 .lobby-back {
@@ -936,6 +974,7 @@ body {
   color: var(--oxblood);
   border: 2px solid rgba(110, 28, 28, 0.55);
   padding: 0.55rem 1.2rem;
+  box-sizing: border-box;
   box-shadow: inset 0 0 0 1px rgba(110, 28, 28, 0.12);
   transition: background 0.15s ease, transform 0.12s ease;
   cursor: pointer;
@@ -966,6 +1005,7 @@ body {
   color: var(--forest);
   border: 2px solid rgba(61, 90, 64, 0.55);
   padding: 0.55rem 1.2rem;
+  box-sizing: border-box;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 5px;
