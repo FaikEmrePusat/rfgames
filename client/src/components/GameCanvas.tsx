@@ -14,6 +14,103 @@ function cellCenter(c: number, r: number, cs: number) {
   return { x: c * cs + cs / 2, y: r * cs + cs / 2 };
 }
 
+/** Subtle wood wash for Otantik map base (no raster texture). */
+function drawOtantikWoodWash(
+  ctx: CanvasRenderingContext2D,
+  mapW: number,
+  mapH: number,
+  mat: MapMaterials,
+) {
+  ctx.fillStyle = mat.waterFallback;
+  ctx.fillRect(0, 0, mapW, mapH);
+  ctx.fillStyle = mat.waterTint;
+  ctx.fillRect(0, 0, mapW, mapH);
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(58, 42, 28, 0.06)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < mapW; x += 11) {
+    ctx.beginPath();
+    ctx.moveTo(x + 0.5, 0);
+    ctx.lineTo(x + 0.5, mapH);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(184, 90, 42, 0.05)';
+  for (let y = 0; y < mapH; y += 48) {
+    ctx.beginPath();
+    ctx.moveTo(0, y + 0.5);
+    ctx.lineTo(mapW, y + 0.5);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/** Screen-space map frame: double line, corner ornaments, copper rivets. */
+function drawOtantikMapFrame(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  fw: number,
+  fh: number,
+) {
+  const pad = 5;
+  const ox = x - pad;
+  const oy = y - pad;
+  const ow = fw + pad * 2;
+  const oh = fh + pad * 2;
+  const copper = '#a67c3a';
+  const copperBright = '#c49a4a';
+  const stamp = '#b85a2a';
+
+  ctx.save();
+  ctx.strokeStyle = copper;
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(ox + 0.5, oy + 0.5, ow - 1, oh - 1);
+  ctx.strokeStyle = copperBright;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(ox + 4.5, oy + 4.5, ow - 9, oh - 9);
+
+  const arm = Math.min(22, ow * 0.08, oh * 0.08);
+  const corners: [number, number, number, number][] = [
+    [ox, oy, 1, 1],
+    [ox + ow, oy, -1, 1],
+    [ox, oy + oh, 1, -1],
+    [ox + ow, oy + oh, -1, -1],
+  ];
+  ctx.strokeStyle = stamp;
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'square';
+  for (const [cx, cy, sx, sy] of corners) {
+    ctx.beginPath();
+    ctx.moveTo(cx + sx * arm, cy);
+    ctx.lineTo(cx, cy);
+    ctx.lineTo(cx, cy + sy * arm);
+    ctx.stroke();
+  }
+
+  const rivets: [number, number][] = [
+    [ox, oy],
+    [ox + ow, oy],
+    [ox, oy + oh],
+    [ox + ow, oy + oh],
+    [ox + ow / 2, oy],
+    [ox + ow / 2, oy + oh],
+    [ox, oy + oh / 2],
+    [ox + ow, oy + oh / 2],
+  ];
+  for (const [rx, ry] of rivets) {
+    ctx.beginPath();
+    ctx.fillStyle = stamp;
+    ctx.arc(rx, ry, 2.4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.fillStyle = copperBright;
+    ctx.arc(rx - 0.5, ry - 0.5, 0.9, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 function drawBridgeLines(
   ctx: CanvasRenderingContext2D,
   bridges: Bridge[],
@@ -227,7 +324,9 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
     mapCacheKeyRef.current = key;
 
     const parchment = parchmentRef.current;
-    if (mat.useParchmentTexture && parchment?.complete) {
+    if (themeRef.current === 'otantik') {
+      drawOtantikWoodWash(ctx, mapW, mapH, mat);
+    } else if (mat.useParchmentTexture && parchment?.complete) {
       const pattern = ctx.createPattern(parchment, 'repeat');
       if (pattern) {
         ctx.fillStyle = pattern;
@@ -362,6 +461,12 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
     }
 
     ctx.restore();
+
+    if (themeRef.current === 'otantik') {
+      const mapW = g.gridCols * cs;
+      const mapH = g.gridRows * cs;
+      drawOtantikMapFrame(ctx, offsetX, offsetY, mapW * zoom, mapH * zoom);
+    }
   }, [highlightValid, rebuildMapCache]);
 
   const scheduleDraw = useCallback(() => {

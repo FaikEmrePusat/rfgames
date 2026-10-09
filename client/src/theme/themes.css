@@ -248,15 +248,36 @@
   --shadow-lift: 0 2px 0 rgba(42, 31, 20, 0.1);
 
   --grain-opacity: 0.1;
+  /* Wood grain + kilim stripe field — CSS only, no raster texture */
   --atmosphere:
-    linear-gradient(165deg, rgba(58, 42, 28, 0.06) 0%, transparent 42%),
-    linear-gradient(0deg, rgba(90, 60, 35, 0.05) 0%, transparent 35%),
+    linear-gradient(165deg, rgba(58, 42, 28, 0.07) 0%, transparent 44%),
+    linear-gradient(0deg, rgba(90, 60, 35, 0.055) 0%, transparent 38%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(90, 60, 35, 0.045) 0px,
+      rgba(90, 60, 35, 0.045) 1px,
+      transparent 1px,
+      transparent 9px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 56px,
+      rgba(184, 90, 42, 0.055) 56px,
+      rgba(184, 90, 42, 0.055) 58px,
+      rgba(166, 124, 58, 0.05) 58px,
+      rgba(166, 124, 58, 0.05) 60px,
+      rgba(74, 92, 62, 0.04) 60px,
+      rgba(74, 92, 62, 0.04) 61px,
+      transparent 61px,
+      transparent 72px
+    ),
     repeating-linear-gradient(
       92deg,
       transparent,
       transparent 47px,
-      rgba(58, 42, 28, 0.035) 47px,
-      rgba(58, 42, 28, 0.035) 49px
+      rgba(58, 42, 28, 0.04) 47px,
+      rgba(58, 42, 28, 0.04) 49px
     );
   --atmosphere-size: auto;
   --chrome-rule: 3px solid var(--oak);
@@ -377,7 +398,7 @@
 [data-theme='otantik'] .site-header {
   border-bottom: var(--chrome-rule);
   background: linear-gradient(180deg, #efe6d0 0%, var(--paper) 100%);
-  box-shadow: inset 0 -2px 0 rgba(184, 90, 42, 0.35);
+  /* Kilim stripe drawn via ::after — see Otantik chrome block */
 }
 
 [data-theme='otantik'] .lobby-panel,
@@ -626,4 +647,185 @@
 
 .map-zoom-btn:active {
   transform: scale(0.95);
+}
+
+/* —— Otantik handmade chrome (SVG/CSS only; other themes untouched) —— */
+[data-theme='otantik'] {
+  --otantik-copper: #a67c3a;
+  --otantik-copper-bright: #c49a4a;
+  --otantik-kilim:
+    repeating-linear-gradient(
+      90deg,
+      #8a4520 0 3px,
+      #c49a4a 3px 5px,
+      #4a5c3e 5px 7px,
+      transparent 7px 16px
+    );
+  --otantik-corner: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='none'%3E%3Cpath stroke='%23a67c3a' stroke-width='2' d='M2 26V8a6 6 0 0 1 6-6h18'/%3E%3Cpath stroke='%23c49a4a' stroke-width='1' d='M6 26V10a4 4 0 0 1 4-4h16'/%3E%3Ccircle cx='8' cy='8' r='1.6' fill='%23b85a2a'/%3E%3C/svg%3E");
+  --otantik-damga: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Ccircle cx='16' cy='16' r='13' stroke='%23b85a2a' stroke-width='1.6'/%3E%3Ccircle cx='16' cy='16' r='9.5' stroke='%23a67c3a' stroke-width='1'/%3E%3Cpath fill='%23b85a2a' d='M16 7.5 19.2 14.2 26.5 15l-5.4 5 1.5 7.2L16 23.5 9.4 27.2l1.5-7.2L5.5 15l7.3-.8z'/%3E%3C/svg%3E");
+  --otantik-zar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Crect x='2.5' y='2.5' width='15' height='15' rx='2' stroke='%23a67c3a' stroke-width='1.4'/%3E%3Ccircle cx='7' cy='7' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='13' cy='7' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='10' cy='10' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='7' cy='13' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='13' cy='13' r='1.35' fill='%23b85a2a'/%3E%3C/svg%3E");
+}
+
+/* Thin kilim stripe under header */
+[data-theme='otantik'] .site-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 5px;
+  pointer-events: none;
+  background: var(--otantik-kilim);
+  opacity: 0.85;
+}
+
+/* Brand damga mark (hub header + leave-home brand button) */
+[data-theme='otantik'] .site-header .hand-title::before {
+  content: '';
+  display: inline-block;
+  width: 0.95em;
+  height: 0.95em;
+  margin-right: 0.35em;
+  vertical-align: -0.12em;
+  background: var(--otantik-damga) no-repeat center / contain;
+}
+
+[data-theme='otantik'] .hub-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+[data-theme='otantik'] .hub-title::before {
+  content: '';
+  flex-shrink: 0;
+  width: 1.15em;
+  height: 1.15em;
+  background: var(--otantik-damga) no-repeat center / contain;
+}
+
+/* Chevron / diamond rule under hub kicker */
+[data-theme='otantik'] .hub-kicker {
+  opacity: 1;
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+}
+
+[data-theme='otantik'] .hub-kicker::after {
+  content: '';
+  display: block;
+  width: 7.5rem;
+  height: 10px;
+  margin-top: var(--space-2);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='10' fill='none'%3E%3Cpath stroke='%23a67c3a' stroke-width='1.2' d='M0 5h18l4-3.5L26 5l4 3.5L34 5h18l4-3.5L60 5l4 3.5L68 5h18l4-3.5L94 5l4 3.5L102 5h18'/%3E%3Cpath fill='%23b85a2a' d='M58 2.2 61.8 5 58 7.8 54.2 5z'/%3E%3C/svg%3E")
+    no-repeat left center / contain;
+}
+
+/* Hub list top kilim hairline */
+[data-theme='otantik'] .hub-screen__list {
+  position: relative;
+  border-top-color: transparent;
+  padding-top: 5px;
+}
+
+[data-theme='otantik'] .hub-screen__list::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 5px;
+  pointer-events: none;
+  background: var(--otantik-kilim);
+  opacity: 0.9;
+}
+
+/* Copper corner brackets + inner line on panels */
+[data-theme='otantik'] .lobby-panel::before,
+[data-theme='otantik'] .parchment-panel::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  pointer-events: none;
+  z-index: 1;
+  border: 1px solid rgba(166, 124, 58, 0.35);
+  border-radius: 1px;
+  background-repeat: no-repeat;
+  background-size: 22px 22px;
+  background-position:
+    top left,
+    top right,
+    bottom left,
+    bottom right;
+  background-image:
+    var(--otantik-corner),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='none'%3E%3Cg transform='translate(28 0) scale(-1 1)'%3E%3Cpath stroke='%23a67c3a' stroke-width='2' d='M2 26V8a6 6 0 0 1 6-6h18'/%3E%3Cpath stroke='%23c49a4a' stroke-width='1' d='M6 26V10a4 4 0 0 1 4-4h16'/%3E%3Ccircle cx='8' cy='8' r='1.6' fill='%23b85a2a'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='none'%3E%3Cg transform='translate(0 28) scale(1 -1)'%3E%3Cpath stroke='%23a67c3a' stroke-width='2' d='M2 26V8a6 6 0 0 1 6-6h18'/%3E%3Cpath stroke='%23c49a4a' stroke-width='1' d='M6 26V10a4 4 0 0 1 4-4h16'/%3E%3Ccircle cx='8' cy='8' r='1.6' fill='%23b85a2a'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='none'%3E%3Cg transform='translate(28 28) scale(-1 -1)'%3E%3Cpath stroke='%23a67c3a' stroke-width='2' d='M2 26V8a6 6 0 0 1 6-6h18'/%3E%3Cpath stroke='%23c49a4a' stroke-width='1' d='M6 26V10a4 4 0 0 1 4-4h16'/%3E%3Ccircle cx='8' cy='8' r='1.6' fill='%23b85a2a'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Kilim stripe on lobby panel top edge */
+[data-theme='otantik'] .lobby-panel::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 4px;
+  pointer-events: none;
+  z-index: 2;
+  background: var(--otantik-kilim);
+  opacity: 0.9;
+}
+
+/* Header seal zar flourish */
+[data-theme='otantik'] .header-seal__label::before {
+  content: '';
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-right: 0.3em;
+  vertical-align: -0.1em;
+  background: var(--otantik-zar) no-repeat center / contain;
+  opacity: 0.9;
+}
+
+/* Fold paper chrome — light copper corners only */
+[data-theme='otantik'] .fold-stage {
+  position: relative;
+}
+
+[data-theme='otantik'] .fold-stage::before,
+[data-theme='otantik'] .fold-stage::after {
+  content: '';
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.75;
+  background: var(--otantik-corner) no-repeat center / contain;
+}
+
+[data-theme='otantik'] .fold-stage::before {
+  top: 4px;
+  left: 4px;
+}
+
+[data-theme='otantik'] .fold-stage::after {
+  top: 4px;
+  right: 4px;
+  transform: scaleX(-1);
+}
+
+@media (max-width: 480px) {
+  [data-theme='otantik'] .lobby-panel::before,
+  [data-theme='otantik'] .parchment-panel::before {
+    inset: 5px;
+    background-size: 18px 18px;
+  }
+
+  [data-theme='otantik'] .hub-title::before {
+    width: 1em;
+    height: 1em;
+  }
 }

@@ -211,7 +211,8 @@ export const MAP_MATERIALS: Record<ThemeId, MapMaterials> = {
     labelInk: '#2a1f14',
     validBridgeFill: 'rgba(184, 90, 42, 0.38)',
     validBridgeStroke: '#8a4520',
-    useParchmentTexture: true,
+    /* Canvas-drawn wood wash + frame chrome; no raster parchment */
+    useParchmentTexture: false,
     displayFont: '"Source Serif 4", Georgia, "Times New Roman", serif',
     uiFont: '"IBM Plex Sans", "Segoe UI", system-ui, sans-serif',
     landStyle: 'fill',
