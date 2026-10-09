@@ -39,6 +39,12 @@
   --border-strong: 1px solid rgba(90, 60, 30, 0.36);
   --shadow-panel: 0 10px 28px rgba(30, 18, 8, 0.18), 0 1px 0 rgba(255, 248, 230, 0.35) inset;
   --shadow-lift: 0 14px 32px rgba(30, 18, 8, 0.22);
+
+  /* Scrollbars: warm parchment track, ink/oxblood thumb */
+  --scroll-size: 7px;
+  --scroll-track: rgba(168, 144, 104, 0.22);
+  --scroll-thumb: rgba(62, 36, 20, 0.42);
+  --scroll-thumb-hover: rgba(110, 28, 28, 0.55);
 }
 
 html,
@@ -58,6 +64,47 @@ body {
   color: var(--ink);
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
+
+/* Parchment scrollbars (WebKit + Firefox via scrollbar-* above) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--scroll-size);
+  height: var(--scroll-size);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 #root {
@@ -517,8 +564,15 @@ body {
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: var(--space-4) var(--space-4) var(--space-3);
+  overscroll-behavior: contain;
+  padding: var(--space-3) var(--space-3) var(--space-2);
   -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 768px) {
+  .lobby-panel__scroll {
+    padding: var(--space-4) var(--space-4) var(--space-3);
+  }
 }
 
 .lobby-panel__footer {
@@ -609,8 +663,14 @@ body {
   font-size: calc(var(--text-body) * 0.94);
   font-weight: 500;
   color: var(--ink-soft);
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--space-3);
   opacity: 0.9;
+}
+
+@media (min-width: 768px) {
+  .lobby-sub {
+    margin-bottom: var(--space-4);
+  }
 }
 
 .lobby-slots {
@@ -912,6 +972,7 @@ body {
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -945,6 +1006,7 @@ body {
   font-weight: 500;
   max-height: 7rem;
   overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: var(--space-1_5);
