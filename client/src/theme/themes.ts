@@ -1,4 +1,4 @@
-export const THEME_IDS = ['defter', 'liman', 'gece', 'tebesir'] as const;
+export const THEME_IDS = ['defter', 'liman', 'gece', 'tebesir', 'otantik'] as const;
 
 export type ThemeId = (typeof THEME_IDS)[number];
 
@@ -12,6 +12,7 @@ export const THEME_META: Record<
   liman: { label: 'Liman', hint: 'harita masası' },
   gece: { label: 'Gece', hint: 'fener ışığı' },
   tebesir: { label: 'Tebeşir', hint: 'kara tahta' },
+  otantik: { label: 'Otantik', hint: 'kahvehane · bakır' },
 };
 
 export function isThemeId(value: string | null | undefined): value is ThemeId {
@@ -186,5 +187,33 @@ export const MAP_MATERIALS: Record<ThemeId, MapMaterials> = {
     uiFont: '"IBM Plex Sans", "Segoe UI", system-ui, sans-serif',
     landStyle: 'chalk',
     gridDash: [2, 5],
+  },
+  otantik: {
+    viewport: '#3a2a1c',
+    waterBase: '#d4c4a8',
+    waterTint: 'rgba(90, 60, 35, 0.18)',
+    waterFallback: '#cbb896',
+    grid: 'rgba(42, 31, 20, 0.55)',
+    landUnclaimed: 'rgba(70, 55, 35, 0.55)',
+    landStroke: 'rgba(42, 31, 20, 0.85)',
+    bridgeSoft: 'rgba(160, 90, 45, 0.4)',
+    bridgeStrong: 'rgba(184, 90, 42, 0.75)',
+    bridgeEndpointOpen: 'rgba(184, 90, 42, 0.28)',
+    bridgeEndpointOpenStroke: 'rgba(140, 70, 30, 0.95)',
+    bridgeEndpointOpenDot: '#8a4520',
+    bridgeEndpointOpenLabel: '#6e3818',
+    bridgeEndpointBlocked: 'rgba(90, 75, 55, 0.4)',
+    bridgeEndpointBlockedStroke: 'rgba(90, 75, 55, 0.9)',
+    bridgeEndpointBlockedDot: '#5c4a38',
+    bridgeEndpointBlockedLabel: '#4a3a2a',
+    labelBg: 'rgba(232, 223, 200, 0.94)',
+    labelStroke: 'rgba(42, 31, 20, 0.4)',
+    labelInk: '#2a1f14',
+    validBridgeFill: 'rgba(184, 90, 42, 0.38)',
+    validBridgeStroke: '#8a4520',
+    useParchmentTexture: true,
+    displayFont: '"Source Serif 4", Georgia, "Times New Roman", serif',
+    uiFont: '"IBM Plex Sans", "Segoe UI", system-ui, sans-serif',
+    landStyle: 'fill',
   },
 };
