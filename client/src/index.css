@@ -226,6 +226,56 @@ body {
   animation: panelRise 0.45s ease-out;
 }
 
+/* —— Game end overlay: thumb-zone CTAs on mobile —— */
+.game-end-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: var(--space-3);
+  padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+  background: rgba(42, 34, 24, 0.75);
+  box-sizing: border-box;
+}
+
+.game-end-panel {
+  width: 100%;
+  max-width: 28rem;
+  padding: var(--space-4);
+  text-align: center;
+  transform: rotate(-0.6deg);
+}
+
+.game-end-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.game-end-actions .btn-primary,
+.game-end-actions .btn-ghost {
+  width: 100%;
+  min-height: var(--touch-min);
+  font-size: var(--text-card);
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .game-end-overlay {
+    align-items: center;
+    padding: var(--space-4);
+    padding-bottom: var(--space-4);
+  }
+
+  .game-end-panel {
+    padding: var(--space-6);
+    transform: rotate(-1deg);
+  }
+}
+
 /* —— Hub: brand-first game picker —— */
 .hub-screen {
   flex: 1;
@@ -235,9 +285,10 @@ body {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  /* Mobile: brand up top, picks in lower third (thumb zone) */
+  justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-4) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-3) var(--space-4) calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
   overflow: hidden;
 }
 
@@ -281,6 +332,8 @@ body {
   flex-direction: column;
   gap: var(--space-3);
   min-height: 0;
+  margin-top: auto;
+  padding-bottom: var(--space-2);
 }
 
 .hub-card {
@@ -363,6 +416,7 @@ body {
     display: grid;
     grid-template-columns: 1.35fr 1fr;
     align-items: center;
+    justify-content: center;
     gap: var(--space-6);
     padding: var(--space-6) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
   }
@@ -383,6 +437,8 @@ body {
 
   .hub-screen__list {
     gap: var(--space-3);
+    margin-top: 0;
+    padding-bottom: 0;
   }
 
   .hub-card {
@@ -414,9 +470,10 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  /* Mobile: stretch so footer CTA sits in thumb zone */
+  align-items: stretch;
+  justify-content: stretch;
+  padding: var(--space-2) var(--space-2) 0;
   overflow: hidden;
 }
 
@@ -425,6 +482,8 @@ body {
   max-width: 26rem;
   max-height: 100%;
   min-height: 0;
+  flex: 1;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -433,10 +492,24 @@ body {
     #ebe0c4;
   color: var(--ink);
   border: var(--border-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   box-shadow: var(--shadow-panel);
   position: relative;
   animation: panelRise 0.4s ease-out;
+}
+
+@media (min-width: 768px) {
+  .lobby-shell {
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .lobby-panel {
+    flex: 0 1 auto;
+    max-height: min(100%, 40rem);
+    border-radius: var(--radius-md);
+  }
 }
 
 .lobby-panel__scroll {
@@ -631,8 +704,14 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-1_5) var(--space-2) calc(var(--space-1_5) + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-2) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
   overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .game-layout {
+    padding: var(--space-1_5) var(--space-2) calc(var(--space-1_5) + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .game-topbar {
@@ -1192,10 +1271,17 @@ body {
   display: flex;
   flex-direction: column;
   gap: var(--space-1_5);
-  padding: var(--space-1_5) var(--space-1)
-    calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  padding: var(--space-2) var(--space-2)
+    calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
   border-top: var(--border-quiet);
   background: rgba(248, 238, 214, 0.62);
+}
+
+@media (min-width: 768px) {
+  .fold-dock {
+    padding: var(--space-1_5) var(--space-2)
+      calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .fold-dock--reveal {

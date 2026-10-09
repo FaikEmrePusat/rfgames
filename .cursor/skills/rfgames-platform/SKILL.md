@@ -16,7 +16,10 @@ Build a cohesive multi-game site that feels handcrafted (parchment / play), not 
 3. Header “home / leave” returns to hub or game lobby consistently
 
 ## Shared UI tokens
-Reuse CSS variables in `client/src/index.css` (`--ink`, `--oxblood`, parchment panels). Improve contrast for idle controls. Prefer Source Sans 3 for UI chrome; Fraunces for brand/titles.
+Reuse CSS variables in `client/src/index.css` (`--ink`, `--oxblood`, parchment panels, `--space-*`, `--touch-min`). Improve contrast for idle controls. Prefer Source Sans 3 for UI chrome; Fraunces for brand/titles.
+
+## Mobile web
+Browser layouts (not native): primary CTAs in the lower third on ~390px. See `rfgames-mobile-web` skill.
 
 ## Online pattern (any game)
 - Client: `VITE_SERVER_URL`

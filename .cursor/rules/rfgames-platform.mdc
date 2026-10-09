@@ -22,7 +22,7 @@ You are the design + technical lead. Decide UI system details, naming (except wh
 
 ## Quality bar
 - Contrast: idle tabs/buttons must stay readable on parchment
-- Touch + mouse + pen for canvas games
+- Touch + mouse + pen for canvas games; mobile web thumb zone (see `rfgames-mobile-web` skill/rule)
 - Local bots where it makes sense (Kapmaca yes; fold-draw no AI artist unless asked)
 - Prefer real interaction over decorative cards
 - Verify with browser or Playwright after meaningful UI/game changes
@@ -33,4 +33,4 @@ You are the design + technical lead. Decide UI system details, naming (except wh
 - CORS `*` in production advice without warning
 
 ## Skills
-Apply project skills in `.cursor/skills/` and relevant user skills (`frontend-design`, `develop-web-game`, `react-best-practices`, `webapp-testing`, `security-best-practices`).
+Apply project skills in `.cursor/skills/` (`rfgames-platform`, `rfgames-mobile-web`, `fold-draw-exquisite`) and relevant user skills (`frontend-design`, `develop-web-game`, `react-best-practices`, `webapp-testing`, `security-best-practices`).

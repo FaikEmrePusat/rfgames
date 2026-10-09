@@ -374,8 +374,8 @@ export function GameScreen({
       </div>
 
       {game.phase === 'game_over' && game.winnerIds && (
-        <div className="fixed inset-0 bg-[#2a2218]/75 flex items-center justify-center z-50 p-3">
-          <div className="parchment-panel p-6 text-center max-w-md w-full -rotate-1">
+        <div className="game-end-overlay">
+          <div className="parchment-panel game-end-panel">
             <h3 className="hand-title text-4xl mb-1">Sefer bitti</h3>
             <div className="ornament-line my-2 max-w-[7rem] mx-auto" />
             <p className="hand-note text-lg mb-4">
@@ -390,16 +390,16 @@ export function GameScreen({
                 currentPlayerId={-1}
               />
             </div>
-            <div className="mt-4 flex flex-col gap-2">
+            <div className="game-end-actions">
               {onPlayAgain && (
-                <button type="button" onClick={onPlayAgain} className="btn-primary w-full text-xl">
+                <button type="button" onClick={onPlayAgain} className="btn-primary">
                   Yeniden oyna
                 </button>
               )}
               {rematchWaiting && !onPlayAgain && (
                 <p className="hand-note text-base mb-0">Host yeniden başlatacak…</p>
               )}
-              <button type="button" onClick={onLeave} className="btn-ghost w-full text-xl">
+              <button type="button" onClick={onLeave} className="btn-ghost">
                 Ana menüye dön
               </button>
             </div>

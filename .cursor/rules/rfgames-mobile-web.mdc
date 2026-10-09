@@ -1,0 +1,21 @@
+---
+description: RF Games mobile-web thumb zone, spacing, touch targets, parchment identity
+globs: client/src/**/*.{css,tsx}
+alwaysApply: false
+---
+
+# RF Games Mobile Web
+
+Product is a **browser hub** (Kapmaca + Katla-Çiz), not React Native/Flutter, not a game directory.
+
+## Layout
+- Primary CTAs in the **lower third** on ~390px (hub picks, lobby footer, docks, game-end)
+- Spacing via `--space-*` (8pt base: `--space-2`); touch floor `--touch-min` (≥44px)
+- Keep `100dvh` `.app-shell` no-scroll; scroll only inside panel regions; use safe-area insets
+
+## Identity
+- Keep parchment/atelier tokens (ink, oxblood, Fraunces / Source Sans 3)
+- No slate-zinc-neon SaaS, no purple dark gaming catalog, no scrapbook dashed PNG spam, no generic shadcn rewrite
+
+## Detail
+Read `.cursor/skills/rfgames-mobile-web/SKILL.md` when changing hub/lobby/dock/end layouts.

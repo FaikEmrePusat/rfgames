@@ -32,7 +32,7 @@ You own **design and engineering** for this multi-game web platform. The human s
 
 ## Skills to apply
 
-Project skills under `.cursor/skills/` plus user skills: `frontend-design`, `develop-web-game`, `react-best-practices`, `webapp-testing`, `playwright`, `security-best-practices`, `nodejs-best-practices`, `composition-patterns`, `web-design-guidelines`.
+Project skills under `.cursor/skills/` (`rfgames-platform`, `rfgames-mobile-web`, `fold-draw-exquisite`) plus user skills: `frontend-design`, `develop-web-game`, `react-best-practices`, `webapp-testing`, `playwright`, `security-best-practices`, `nodejs-best-practices`, `composition-patterns`, `web-design-guidelines`.
 
 ## MCP / tooling
 
