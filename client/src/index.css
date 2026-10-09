@@ -39,12 +39,6 @@
   --border-strong: 1px solid rgba(90, 60, 30, 0.36);
   --shadow-panel: 0 10px 28px rgba(30, 18, 8, 0.18), 0 1px 0 rgba(255, 248, 230, 0.35) inset;
   --shadow-lift: 0 14px 32px rgba(30, 18, 8, 0.22);
-
-  /* Scrollbars: warm parchment track, ink/oxblood thumb */
-  --scroll-size: 7px;
-  --scroll-track: rgba(168, 144, 104, 0.22);
-  --scroll-thumb: rgba(62, 36, 20, 0.42);
-  --scroll-thumb-hover: rgba(110, 28, 28, 0.55);
 }
 
 html,
@@ -64,47 +58,18 @@ body {
   color: var(--ink);
   min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
-  scrollbar-width: thin;
-  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
 }
 
-/* Parchment scrollbars (WebKit + Firefox via scrollbar-* above) */
+/* Hide scrollbars visually; overflow scroll still works (wheel / trackpad / touch) */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 *::-webkit-scrollbar {
-  width: var(--scroll-size);
-  height: var(--scroll-size);
-}
-
-*::-webkit-scrollbar-track {
-  background: var(--scroll-track);
-  border-radius: 999px;
-}
-
-*::-webkit-scrollbar-thumb {
-  background: var(--scroll-thumb);
-  border-radius: 999px;
-  border: 1px solid transparent;
-  background-clip: padding-box;
-}
-
-*::-webkit-scrollbar-thumb:hover {
-  background: var(--scroll-thumb-hover);
-  border: 1px solid transparent;
-  background-clip: padding-box;
-}
-
-*::-webkit-scrollbar-button {
-  display: none;
   width: 0;
   height: 0;
-}
-
-*::-webkit-scrollbar-corner {
-  background: transparent;
+  display: none;
 }
 
 #root {
