@@ -400,7 +400,10 @@
     linear-gradient(180deg, rgba(255, 248, 230, 0.55) 0%, rgba(232, 223, 200, 0.92) 100%),
     url('/themes/otantik/paper-grain.jpg');
   background-size: auto, 180px 180px;
-  /* Kilim stripe via ::after — see Otantik chrome block */
+  /* Equal pad so Ortam / Çık center; kilim hangs below via ::after */
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--otantik-kilim-height, 9px);
 }
 
 [data-theme='otantik'] .lobby-panel,
@@ -557,6 +560,11 @@
 
 .site-header .theme-picker--menu {
   flex-shrink: 0;
+  align-self: center;
+}
+
+.site-header .btn-ghost {
+  align-self: center;
 }
 
 .theme-picker__trigger {
@@ -667,6 +675,7 @@
 [data-theme='otantik'] {
   --otantik-copper: #a67c3a;
   --otantik-copper-bright: #c49a4a;
+  --otantik-kilim-height: 9px;
   --otantik-kilim: url('/themes/otantik/kilim-band.png');
   --otantik-kilim-fallback:
     repeating-linear-gradient(
@@ -682,15 +691,18 @@
   --otantik-zar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Crect x='2.5' y='2.5' width='15' height='15' rx='2' stroke='%23a67c3a' stroke-width='1.4'/%3E%3Ccircle cx='7' cy='7' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='13' cy='7' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='10' cy='10' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='7' cy='13' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='13' cy='13' r='1.35' fill='%23b85a2a'/%3E%3C/svg%3E");
 }
 
-/* Woven kilim strip under header */
+/* Woven kilim strip just under the header border — outside the control band */
 [data-theme='otantik'] .site-header::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
-  height: 9px;
+  top: 100%;
+  bottom: auto;
+  height: var(--otantik-kilim-height);
+  transform: none;
   pointer-events: none;
+  z-index: 1;
   background-color: #8a4520;
   background-image: var(--otantik-kilim), var(--otantik-kilim-fallback);
   background-repeat: repeat-x, repeat-x;
