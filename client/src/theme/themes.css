@@ -420,15 +420,21 @@
   max-width: 100%;
 }
 
-.hub-screen .theme-picker {
-  margin-top: var(--space-2);
+.hub-screen .theme-picker--menu {
+  margin-top: var(--space-3);
+  align-self: flex-start;
 }
 
 .lobby-theme-slot {
   margin: var(--space-3) 0 var(--space-2);
 }
 
-/* Compact in-game Ortam menu (topbar / fold chrome) */
+.lobby-theme-slot .theme-picker--menu {
+  align-self: flex-start;
+  width: fit-content;
+}
+
+/* Compact Ortam menu (hub / lobby / in-game chrome) */
 .theme-picker--menu {
   position: relative;
   flex-direction: row;
@@ -471,7 +477,21 @@
 }
 
 .theme-picker__trigger-label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35em;
   line-height: 1;
+}
+
+.theme-picker__trigger-current {
+  font-weight: 500;
+  opacity: 0.72;
+}
+
+.theme-picker__trigger-current::before {
+  content: '·';
+  margin-right: 0.35em;
+  opacity: 0.55;
 }
 
 .theme-picker__popover {
@@ -485,6 +505,12 @@
   border-radius: var(--radius-md);
   background: var(--paper);
   box-shadow: var(--shadow-lift);
+}
+
+.hub-screen .theme-picker__popover,
+.lobby-theme-slot .theme-picker__popover {
+  left: 0;
+  right: auto;
 }
 
 .theme-picker__popover .theme-picker__rail {

@@ -4,7 +4,7 @@ import { THEME_IDS, THEME_META, type ThemeId } from './themes';
 interface Props {
   theme: ThemeId;
   onChange: (theme: ThemeId) => void;
-  /** Compact strip for hub / lobby; menu for in-game chrome */
+  /** Full always-open rail, or compact Ortam trigger + popover */
   variant?: 'rail' | 'menu';
   className?: string;
 }
@@ -78,7 +78,10 @@ export function ThemePicker({
           onClick={() => setOpen((v) => !v)}
         >
           <span className={`theme-picker__swatch theme-picker__swatch--${theme}`} aria-hidden />
-          <span className="theme-picker__trigger-label">Ortam</span>
+          <span className="theme-picker__trigger-label">
+            Ortam
+            <span className="theme-picker__trigger-current">{meta.label}</span>
+          </span>
         </button>
         {open && (
           <div

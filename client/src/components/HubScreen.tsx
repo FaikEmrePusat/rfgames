@@ -14,7 +14,7 @@ export function HubScreen({ onPickKapmaca, onPickFoldDraw, theme, onThemeChange 
       <div className="hub-screen__intro">
         <h2 className="hub-title">RF Games</h2>
         <p className="hub-kicker">iki oyun · aynı masa</p>
-        <ThemePicker theme={theme} onChange={onThemeChange} />
+        <ThemePicker theme={theme} onChange={onThemeChange} variant="menu" />
       </div>
 
       <div className="hub-screen__list">

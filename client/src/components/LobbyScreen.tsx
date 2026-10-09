@@ -147,7 +147,7 @@ export function LobbyScreen({
 
           {theme && onThemeChange && (
             <div className="lobby-theme-slot">
-              <ThemePicker theme={theme} onChange={onThemeChange} />
+              <ThemePicker theme={theme} onChange={onThemeChange} variant="menu" />
             </div>
           )}
 
