@@ -1,0 +1,13 @@
+---
+description: Kare Kapmaca (island conquest) conventions
+globs: shared/src/map*.ts,shared/src/rules*.ts,shared/src/bot*.ts,shared/src/turnOrchestrator.ts,shared/src/gameFactory.ts,client/src/components/Game*.tsx,client/src/components/LobbyScreen.tsx,client/src/hooks/use*Game.ts,server/src/**
+alwaysApply: false
+---
+
+# Kare Kapmaca
+
+- Phases: `roll_order` → `roll` → `claim` → `turn_complete` → `game_over`
+- Mutations go through `turnOrchestrator` / shared rules; keep local and online aligned
+- Bots: `chooseBotClaim` difficulties easy/medium/hard; local only
+- Map: many small islands, bridges, auto-fill isolation
+- UI: parchment + Caveat/Kalam; title **Kare Kapmaca**

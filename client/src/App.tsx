@@ -1,0 +1,194 @@
+import { useState } from 'react';
+import { HubScreen } from './components/HubScreen';
+import { LobbyScreen } from './components/LobbyScreen';
+import { GameScreen } from './components/GameScreen';
+import { FoldLobby } from './components/foldDraw/FoldLobby';
+import { FoldGameScreen } from './components/foldDraw/FoldGameScreen';
+import { useLocalGame } from './hooks/useLocalGame';
+import { useOnlineGame } from './hooks/useOnlineGame';
+import { useLocalFoldDraw } from './hooks/useLocalFoldDraw';
+
+type AppMode = 'hub' | 'kapmaca' | 'fold';
+
+export default function App() {
+  const [mode, setMode] = useState<AppMode>('hub');
+  const local = useLocalGame();
+  const online = useOnlineGame();
+  const fold = useLocalFoldDraw();
+
+  const inLocalGame = local.game !== null;
+  const inOnlineGame = online.game !== null;
+  const inOnlineLobby = online.session !== null && !inOnlineGame;
+  const inFoldGame = fold.game !== null;
+  const inKapmaca = mode === 'kapmaca' && (inLocalGame || inOnlineGame || inOnlineLobby);
+  const inFoldLobby = mode === 'fold' && !inFoldGame;
+
+  const canReturnHome =
+    mode !== 'hub' || inLocalGame || inOnlineGame || inOnlineLobby || inFoldGame;
+
+  const goHub = () => {
+    if (inLocalGame) local.leaveGame();
+    if (inOnlineGame || inOnlineLobby) online.leave();
+    if (inFoldGame) fold.leave();
+    setMode('hub');
+  };
+
+  const goKapmacaLobby = () => {
+    fold.leave();
+    setMode('kapmaca');
+  };
+
+  const headerTitle =
+    mode === 'fold' || inFoldGame ? 'Katla-Çiz' : mode === 'kapmaca' || inKapmaca ? 'Kare Kapmaca' : 'RF Games';
+
+  return (
+    <div className="app-shell">
+      <header className="site-header sticky top-0 z-40">
+        <div className="site-header__inner">
+          <div className="min-w-0">
+            {canReturnHome && mode !== 'hub' ? (
+              <button
+                type="button"
+                onClick={goHub}
+                className="site-header__brand text-left"
+                title="Oyun seçimine dön"
+              >
+                <h1 className="hand-title text-3xl sm:text-4xl truncate leading-none">{headerTitle}</h1>
+                <p className="hand-note text-sm mt-1">← oyun seçimi</p>
+              </button>
+            ) : (
+              <>
+                <h1 className="hand-title text-3xl sm:text-4xl truncate leading-none">{headerTitle}</h1>
+                <p className="hand-note text-sm mt-1">RF Games · el yazması</p>
+              </>
+            )}
+          </div>
+          <div className="flex items-end gap-3 shrink-0">
+            {mode !== 'hub' && (
+              <button type="button" onClick={goHub} className="btn-ghost">
+                Çık
+              </button>
+            )}
+            {online.session && mode === 'kapmaca' && (
+              <div className="header-seal">
+                <span className="header-seal__label">mühür</span>
+                <span className="header-seal__code">{online.session.roomCode}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        {mode === 'hub' && (
+          <HubScreen
+            onPickKapmaca={goKapmacaLobby}
+            onPickFoldDraw={() => {
+              local.leaveGame();
+              online.leave();
+              setMode('fold');
+            }}
+          />
+        )}
+
+        {mode === 'fold' && inFoldGame && fold.game && (
+          <FoldGameScreen
+            game={fold.game}
+            onCommitLayer={fold.commitLayer}
+            onUndo={fold.undo}
+            onFold={fold.foldAndPass}
+            onLeave={goHub}
+            onNewDrawing={() => {
+              fold.leave();
+              setMode('fold');
+            }}
+            canUndo={fold.canUndo}
+          />
+        )}
+
+        {inFoldLobby && <FoldLobby onStart={fold.startGame} onBack={goHub} />}
+
+        {mode === 'kapmaca' && inLocalGame && local.game && (
+          <GameScreen
+            game={local.game}
+            orderRollIdx={local.orderRollIdx}
+            toast={local.toast}
+            canInteract
+            onRollOrder={local.rollOrderDice}
+            onRollDice={local.rollTurnDice}
+            onClaim={local.claimTile}
+            onEndTurn={local.endTurn}
+            onLeave={local.leaveGame}
+          />
+        )}
+
+        {mode === 'kapmaca' && inOnlineGame && online.game && online.session && (
+          <GameScreen
+            game={online.game}
+            orderRollIdx={Math.max(0, online.game.players.findIndex((p) => p.orderRoll === null))}
+            toast={online.toast}
+            canInteract={online.canInteract}
+            myLabel="online"
+            onRollOrder={online.rollOrderDice}
+            onRollDice={online.rollTurnDice}
+            onClaim={online.claimTile}
+            onEndTurn={online.endTurn}
+            onLeave={online.leave}
+          />
+        )}
+
+        {mode === 'kapmaca' && inOnlineLobby && online.session && (
+          <div className="lobby-shell">
+            <div className="lobby-panel">
+              <div className="lobby-panel__scroll">
+                <button type="button" onClick={online.leave} className="lobby-back">
+                  ← vazgeç
+                </button>
+                <h2 className="lobby-heading">
+                  {online.session.isHost ? 'Oyuncular bekleniyor' : 'Lobide bekleniyor'}
+                </h2>
+                <p className="lobby-sub">Bu mührü arkadaşlarınla paylaş</p>
+                <div className="lobby-online-code">{online.session.roomCode}</div>
+                <ul className="lobby-members">
+                  {online.session.members.map((m) => (
+                    <li key={m.id}>— {m.name}</li>
+                  ))}
+                </ul>
+                {online.error && <p className="lobby-error">{online.error}</p>}
+                {!online.session.isHost && (
+                  <p className="lobby-hint">Host oyunu başlatacak…</p>
+                )}
+              </div>
+              <div className="lobby-panel__footer">
+                {online.session.isHost ? (
+                  <button
+                    type="button"
+                    onClick={online.startOnlineGame}
+                    disabled={online.session.members.length < 2}
+                    className="btn-primary"
+                  >
+                    Oyunu başlat · {online.session.members.length}
+                  </button>
+                ) : (
+                  <p className="lobby-meta mb-0">Bekleniyor…</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {mode === 'kapmaca' && !inLocalGame && !inOnlineGame && !inOnlineLobby && (
+          <>
+            {online.error && <p className="lobby-error shrink-0 px-3 pt-1">{online.error}</p>}
+            <LobbyScreen
+              onStartLocal={local.startGame}
+              onCreateOnline={online.createRoom}
+              onJoinOnline={online.joinRoom}
+              onBack={goHub}
+            />
+          </>
+        )}
+      </main>
+    </div>
+  );
+}

@@ -1,0 +1,27 @@
+{
+  "name": "rfgames",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "install:all": "npm install --prefix shared --no-workspaces && npm install --prefix client --no-workspaces --install-links && npm install --prefix server --no-workspaces --install-links",
+    "install:browsers": "npm run install:browsers --prefix client --no-workspaces",
+    "sync:shared": "node ./scripts/sync-shared.mjs",
+    "build:shared": "npm run build --prefix shared --no-workspaces && npm run sync:shared",
+    "build:client": "npm run build --prefix client --no-workspaces",
+    "build:server": "npm run build --prefix server --no-workspaces",
+    "build": "npm run build:shared && npm run build:client && npm run build:server",
+    "start": "npm run start --prefix server --no-workspaces",
+    "dev": "npm run dev --prefix client --no-workspaces",
+    "dev:server": "npm run dev --prefix server --no-workspaces",
+    "test": "npm run test --prefix shared --no-workspaces",
+    "test:e2e": "npm run test:e2e --prefix client --no-workspaces",
+    "verify": "powershell -ExecutionPolicy Bypass -File ./scripts/verify.ps1"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

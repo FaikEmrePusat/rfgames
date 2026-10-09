@@ -1,0 +1,22 @@
+# RF Games — tek Web Service (Express + client/dist + Socket.io)
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: rfgames
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: npm run install:all && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Same-origin tek serviste genelde gerekmez (RENDER_EXTERNAL_URL otomatik eklenir).
+      # Özel alan adı kullanıyorsanız: https://oyunlar.ornek.com
+      - key: CORS_ORIGIN
+        sync: false
+      # İsteğe bağlı: client build sırasında Socket URL’yi sabitlemek için
+      # (boş bırakırsanız üretimde window.location.origin kullanılır)
+      - key: VITE_SERVER_URL
+        sync: false

@@ -1,0 +1,21 @@
+---
+description: Katla-Çiz fold-and-draw game conventions
+globs: "**/fold*/**","**/katla*/**","**/exquisite*/**","shared/src/fold*","docs/GAME2*"
+alwaysApply: false
+---
+
+# Katla-Çiz (Game 2)
+
+## Rules (locked)
+1. Vertical paper, **4 sections**: head, torso, legs, feet (top → bottom)
+2. Players **2–4**; assign sections in order; with fewer than 4 players, wrap so one player may draw multiple sections
+3. After finishing a section, **fold**; next drawer sees only a **peek strip** (bottom edge strokes of previous section)
+4. Freehand: pointer events (mouse/touch/pen), pressure optional later
+5. After last section → **reveal** full unfolded drawing
+6. Local + online; no drawing bots unless explicitly requested
+
+## Tech expectations
+- Stroke model serializable (points + color + width) for Socket sync
+- Authoritative turn index on server for online
+- Canvas hit-testing only in active section; folded regions hidden/masked
+- `window.render_game_to_text` hooks for harness when building playable prototype

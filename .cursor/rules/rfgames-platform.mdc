@@ -1,0 +1,36 @@
+---
+description: RF Games multi-game platform standards (always on)
+alwaysApply: true
+---
+
+# RF Games Platform
+
+## Ownership
+You are the design + technical lead. Decide UI system details, naming (except when user locks a name), architecture, and polish. Ask only when a product rule is ambiguous.
+
+## Monorepo
+- `shared/` — pure game logic, types, bots, orchestrators (no DOM)
+- `client/` — React UI, canvas, hooks
+- `server/` — rooms, Socket.io, validation
+- After shared changes: `npm run build:shared`
+- PowerShell: use `;` not `&&` when chaining fails
+
+## Multi-game hub
+- Home picks a game; do not bury Game 2 inside Kare Kapmaca lobby
+- Shared chrome (header leave-home, parchment language) may be reused; each game may have its own accent/personality
+- Online namespaces/events must be game-scoped (`room:` for Kapmaca is fine; Game 2 uses distinct events or `gameId`)
+
+## Quality bar
+- Contrast: idle tabs/buttons must stay readable on parchment
+- Touch + mouse + pen for canvas games
+- Local bots where it makes sense (Kapmaca yes; fold-draw no AI artist unless asked)
+- Prefer real interaction over decorative cards
+- Verify with browser or Playwright after meaningful UI/game changes
+
+## Forbidden
+- Breaking Kapmaca rules while building Game 2
+- Committing without explicit ask
+- CORS `*` in production advice without warning
+
+## Skills
+Apply project skills in `.cursor/skills/` and relevant user skills (`frontend-design`, `develop-web-game`, `react-best-practices`, `webapp-testing`, `security-best-practices`).
