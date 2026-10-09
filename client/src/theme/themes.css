@@ -247,39 +247,15 @@
   --shadow-panel: inset 0 1px 0 rgba(255, 248, 230, 0.35), 0 1px 0 rgba(42, 31, 20, 0.12);
   --shadow-lift: 0 2px 0 rgba(42, 31, 20, 0.1);
 
-  --grain-opacity: 0.1;
-  /* Wood grain + kilim stripe field — CSS only, no raster texture */
+  --grain-opacity: 0.12;
+  /* Deep coffeehouse field: soft reading wash over tiled wood */
   --atmosphere:
-    linear-gradient(165deg, rgba(58, 42, 28, 0.07) 0%, transparent 44%),
-    linear-gradient(0deg, rgba(90, 60, 35, 0.055) 0%, transparent 38%),
-    repeating-linear-gradient(
-      90deg,
-      rgba(90, 60, 35, 0.045) 0px,
-      rgba(90, 60, 35, 0.045) 1px,
-      transparent 1px,
-      transparent 9px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0,
-      transparent 56px,
-      rgba(184, 90, 42, 0.055) 56px,
-      rgba(184, 90, 42, 0.055) 58px,
-      rgba(166, 124, 58, 0.05) 58px,
-      rgba(166, 124, 58, 0.05) 60px,
-      rgba(74, 92, 62, 0.04) 60px,
-      rgba(74, 92, 62, 0.04) 61px,
-      transparent 61px,
-      transparent 72px
-    ),
-    repeating-linear-gradient(
-      92deg,
-      transparent,
-      transparent 47px,
-      rgba(58, 42, 28, 0.04) 47px,
-      rgba(58, 42, 28, 0.04) 49px
-    );
-  --atmosphere-size: auto;
+    radial-gradient(ellipse 85% 65% at 50% 30%, rgba(232, 223, 200, 0.58) 0%, transparent 58%),
+    linear-gradient(165deg, rgba(42, 28, 16, 0.45) 0%, transparent 50%),
+    linear-gradient(0deg, rgba(58, 42, 28, 0.28) 0%, transparent 40%),
+    url('/themes/otantik/wood-grain.jpg'),
+    linear-gradient(180deg, #8a734f 0%, #6e5a3c 100%);
+  --atmosphere-size: auto, auto, auto, 220px 220px, auto;
   --chrome-rule: 3px solid var(--oak);
 
   --fold-paper: #f2ead6;
@@ -323,10 +299,20 @@
   background-size: 120px 120px;
 }
 
+[data-theme='otantik'] .app-shell {
+  background: #6e5a3c;
+}
+
+[data-theme='otantik'] .app-shell::before {
+  opacity: 1;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+}
+
 [data-theme='otantik'] .app-shell::after {
-  mix-blend-mode: multiply;
-  background-size: 220px 220px;
-  opacity: 0.08;
+  mix-blend-mode: soft-light;
+  background-image: url('/themes/otantik/paper-grain.jpg');
+  background-size: 180px 180px;
+  opacity: 0.45;
 }
 
 /* Display type mood */
@@ -397,14 +383,26 @@
 
 [data-theme='otantik'] .site-header {
   border-bottom: var(--chrome-rule);
-  background: linear-gradient(180deg, #efe6d0 0%, var(--paper) 100%);
-  /* Kilim stripe drawn via ::after — see Otantik chrome block */
+  background:
+    linear-gradient(180deg, rgba(255, 248, 230, 0.55) 0%, rgba(232, 223, 200, 0.92) 100%),
+    url('/themes/otantik/paper-grain.jpg');
+  background-size: auto, 180px 180px;
+  /* Kilim stripe via ::after — see Otantik chrome block */
 }
 
 [data-theme='otantik'] .lobby-panel,
 [data-theme='otantik'] .parchment-panel {
   border-width: 3px;
   border-color: var(--oak);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(180deg, rgba(255, 250, 235, 0.35) 0%, transparent 40%),
+    url('/themes/otantik/paper-grain.jpg');
+  background-size: auto, 160px 160px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 230, 0.45),
+    0 2px 0 rgba(42, 31, 20, 0.14),
+    0 8px 22px rgba(42, 31, 20, 0.12);
 }
 
 [data-theme='tebesir'] .hub-screen__list,
@@ -518,7 +516,10 @@
 }
 
 .theme-picker__swatch--otantik {
-  background: linear-gradient(135deg, #e8dfc8 45%, #b85a2a 45%);
+  background:
+    linear-gradient(135deg, rgba(232, 223, 200, 0.88) 42%, rgba(184, 90, 42, 0.92) 42%),
+    url('/themes/otantik/wood-grain.jpg');
+  background-size: auto, cover;
 }
 
 .theme-picker__name {
@@ -649,59 +650,67 @@
   transform: scale(0.95);
 }
 
-/* —— Otantik handmade chrome (SVG/CSS only; other themes untouched) —— */
+/* —— Otantik handmade chrome (textures + SVG ornaments) —— */
 [data-theme='otantik'] {
   --otantik-copper: #a67c3a;
   --otantik-copper-bright: #c49a4a;
-  --otantik-kilim:
+  --otantik-kilim: url('/themes/otantik/kilim-band.png');
+  --otantik-kilim-fallback:
     repeating-linear-gradient(
       90deg,
       #8a4520 0 3px,
       #c49a4a 3px 5px,
       #4a5c3e 5px 7px,
-      transparent 7px 16px
+      #3a2a1c 7px 9px,
+      transparent 9px 18px
     );
-  --otantik-corner: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' fill='none'%3E%3Cpath stroke='%23a67c3a' stroke-width='2' d='M2 26V8a6 6 0 0 1 6-6h18'/%3E%3Cpath stroke='%23c49a4a' stroke-width='1' d='M6 26V10a4 4 0 0 1 4-4h16'/%3E%3Ccircle cx='8' cy='8' r='1.6' fill='%23b85a2a'/%3E%3C/svg%3E");
-  --otantik-damga: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'%3E%3Ccircle cx='16' cy='16' r='13' stroke='%23b85a2a' stroke-width='1.6'/%3E%3Ccircle cx='16' cy='16' r='9.5' stroke='%23a67c3a' stroke-width='1'/%3E%3Cpath fill='%23b85a2a' d='M16 7.5 19.2 14.2 26.5 15l-5.4 5 1.5 7.2L16 23.5 9.4 27.2l1.5-7.2L5.5 15l7.3-.8z'/%3E%3C/svg%3E");
+  --otantik-corner: url('/themes/otantik/corner-ornament.svg');
+  --otantik-damga: url('/themes/otantik/copper-seal.png');
   --otantik-zar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Crect x='2.5' y='2.5' width='15' height='15' rx='2' stroke='%23a67c3a' stroke-width='1.4'/%3E%3Ccircle cx='7' cy='7' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='13' cy='7' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='10' cy='10' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='7' cy='13' r='1.35' fill='%23b85a2a'/%3E%3Ccircle cx='13' cy='13' r='1.35' fill='%23b85a2a'/%3E%3C/svg%3E");
 }
 
-/* Thin kilim stripe under header */
+/* Woven kilim strip under header */
 [data-theme='otantik'] .site-header::after {
   content: '';
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 5px;
+  height: 9px;
   pointer-events: none;
-  background: var(--otantik-kilim);
-  opacity: 0.85;
+  background-color: #8a4520;
+  background-image: var(--otantik-kilim), var(--otantik-kilim-fallback);
+  background-repeat: repeat-x, repeat-x;
+  background-size: auto 100%, auto 100%;
+  opacity: 1;
+  box-shadow: 0 -1px 0 rgba(58, 42, 28, 0.3), inset 0 1px 0 rgba(196, 154, 74, 0.25);
 }
 
-/* Brand damga mark (hub header + leave-home brand button) */
+/* Brand copper seal (hub header + leave-home brand button) */
 [data-theme='otantik'] .site-header .hand-title::before {
   content: '';
   display: inline-block;
-  width: 0.95em;
-  height: 0.95em;
-  margin-right: 0.35em;
-  vertical-align: -0.12em;
+  width: 1.15em;
+  height: 1.15em;
+  margin-right: 0.4em;
+  vertical-align: -0.2em;
   background: var(--otantik-damga) no-repeat center / contain;
+  filter: drop-shadow(0 1px 1px rgba(42, 31, 20, 0.35));
 }
 
 [data-theme='otantik'] .hub-title {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.55rem;
 }
 
 [data-theme='otantik'] .hub-title::before {
   content: '';
   flex-shrink: 0;
-  width: 1.15em;
-  height: 1.15em;
+  width: 1.45em;
+  height: 1.45em;
   background: var(--otantik-damga) no-repeat center / contain;
+  filter: drop-shadow(0 2px 3px rgba(42, 31, 20, 0.4));
 }
 
 /* Chevron / diamond rule under hub kicker */
@@ -733,10 +742,12 @@
   left: 0;
   right: 0;
   top: 0;
-  height: 5px;
+  height: 6px;
   pointer-events: none;
-  background: var(--otantik-kilim);
-  opacity: 0.9;
+  background-image: var(--otantik-kilim), var(--otantik-kilim-fallback);
+  background-repeat: repeat-x, repeat-x;
+  background-size: auto 100%, auto 100%;
+  opacity: 0.92;
 }
 
 /* Copper corner brackets + inner line on panels */
@@ -770,11 +781,31 @@
   left: 0;
   right: 0;
   top: 0;
-  height: 4px;
+  height: 6px;
   pointer-events: none;
   z-index: 2;
-  background: var(--otantik-kilim);
-  opacity: 0.9;
+  background-image: var(--otantik-kilim), var(--otantik-kilim-fallback);
+  background-repeat: repeat-x, repeat-x;
+  background-size: auto 100%, auto 100%;
+  opacity: 0.94;
+}
+
+/* Hub game rows: copper left accent */
+[data-theme='otantik'] .hub-row {
+  position: relative;
+  padding-left: calc(var(--space-3) + 4px);
+}
+
+[data-theme='otantik'] .hub-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 3px;
+  border-radius: 1px;
+  background: linear-gradient(180deg, var(--otantik-copper-bright), var(--stamp), var(--otantik-copper));
+  opacity: 0.85;
 }
 
 /* Header seal zar flourish */

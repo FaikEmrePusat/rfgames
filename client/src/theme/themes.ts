@@ -12,7 +12,7 @@ export const THEME_META: Record<
   liman: { label: 'Liman', hint: 'harita masası' },
   gece: { label: 'Gece', hint: 'fener ışığı' },
   tebesir: { label: 'Tebeşir', hint: 'kara tahta' },
-  otantik: { label: 'Otantik', hint: 'kahvehane · bakır' },
+  otantik: { label: 'Otantik', hint: 'kahvehane · kilim · bakır' },
 };
 
 export function isThemeId(value: string | null | undefined): value is ThemeId {
@@ -189,10 +189,10 @@ export const MAP_MATERIALS: Record<ThemeId, MapMaterials> = {
     gridDash: [2, 5],
   },
   otantik: {
-    viewport: '#3a2a1c',
+    viewport: '#2e2116',
     waterBase: '#d4c4a8',
-    waterTint: 'rgba(90, 60, 35, 0.18)',
-    waterFallback: '#cbb896',
+    waterTint: 'rgba(90, 60, 35, 0.2)',
+    waterFallback: '#c4b090',
     grid: 'rgba(42, 31, 20, 0.55)',
     landUnclaimed: 'rgba(70, 55, 35, 0.55)',
     landStroke: 'rgba(42, 31, 20, 0.85)',
@@ -211,7 +211,7 @@ export const MAP_MATERIALS: Record<ThemeId, MapMaterials> = {
     labelInk: '#2a1f14',
     validBridgeFill: 'rgba(184, 90, 42, 0.38)',
     validBridgeStroke: '#8a4520',
-    /* Canvas-drawn wood wash + frame chrome; no raster parchment */
+    /* Wood-grain tile + canvas frame chrome */
     useParchmentTexture: false,
     displayFont: '"Source Serif 4", Georgia, "Times New Roman", serif',
     uiFont: '"IBM Plex Sans", "Segoe UI", system-ui, sans-serif',

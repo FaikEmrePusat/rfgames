@@ -14,38 +14,46 @@ function cellCenter(c: number, r: number, cs: number) {
   return { x: c * cs + cs / 2, y: r * cs + cs / 2 };
 }
 
-/** Subtle wood wash for Otantik map base (no raster texture). */
+/** Wood-table wash for Otantik map base (tiled grain when loaded). */
 function drawOtantikWoodWash(
   ctx: CanvasRenderingContext2D,
   mapW: number,
   mapH: number,
   mat: MapMaterials,
+  wood: HTMLImageElement | null,
 ) {
   ctx.fillStyle = mat.waterFallback;
   ctx.fillRect(0, 0, mapW, mapH);
+
+  if (wood?.complete && wood.naturalWidth > 0) {
+    const pattern = ctx.createPattern(wood, 'repeat');
+    if (pattern) {
+      ctx.save();
+      ctx.globalAlpha = 0.42;
+      ctx.fillStyle = pattern;
+      ctx.fillRect(0, 0, mapW, mapH);
+      ctx.restore();
+    }
+  } else {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(58, 42, 28, 0.07)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < mapW; x += 11) {
+      ctx.beginPath();
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, mapH);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   ctx.fillStyle = mat.waterTint;
   ctx.fillRect(0, 0, mapW, mapH);
-
-  ctx.save();
-  ctx.strokeStyle = 'rgba(58, 42, 28, 0.06)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < mapW; x += 11) {
-    ctx.beginPath();
-    ctx.moveTo(x + 0.5, 0);
-    ctx.lineTo(x + 0.5, mapH);
-    ctx.stroke();
-  }
-  ctx.strokeStyle = 'rgba(184, 90, 42, 0.05)';
-  for (let y = 0; y < mapH; y += 48) {
-    ctx.beginPath();
-    ctx.moveTo(0, y + 0.5);
-    ctx.lineTo(mapW, y + 0.5);
-    ctx.stroke();
-  }
-  ctx.restore();
+  ctx.fillStyle = 'rgba(42, 28, 16, 0.08)';
+  ctx.fillRect(0, 0, mapW, mapH);
 }
 
-/** Screen-space map frame: double line, corner ornaments, copper rivets. */
+/** Screen-space map frame: oak outer, copper inner, L-corners, rivets. */
 function drawOtantikMapFrame(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -53,24 +61,41 @@ function drawOtantikMapFrame(
   fw: number,
   fh: number,
 ) {
-  const pad = 5;
+  const pad = 8;
   const ox = x - pad;
   const oy = y - pad;
   const ow = fw + pad * 2;
   const oh = fh + pad * 2;
+  const oak = '#3a2a1c';
   const copper = '#a67c3a';
   const copperBright = '#c49a4a';
   const stamp = '#b85a2a';
 
   ctx.save();
-  ctx.strokeStyle = copper;
-  ctx.lineWidth = 2.5;
+
+  /* Soft outer shadow for depth */
+  ctx.strokeStyle = 'rgba(28, 18, 10, 0.35)';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(ox - 1, oy - 1, ow + 2, oh + 2);
+
+  /* Oak outer rail */
+  ctx.strokeStyle = oak;
+  ctx.lineWidth = 3.5;
   ctx.strokeRect(ox + 0.5, oy + 0.5, ow - 1, oh - 1);
-  ctx.strokeStyle = copperBright;
-  ctx.lineWidth = 1;
+
+  /* Copper mid rail */
+  ctx.strokeStyle = copper;
+  ctx.lineWidth = 2;
   ctx.strokeRect(ox + 4.5, oy + 4.5, ow - 9, oh - 9);
 
-  const arm = Math.min(22, ow * 0.08, oh * 0.08);
+  /* Inner bright hairline */
+  ctx.strokeStyle = copperBright;
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.85;
+  ctx.strokeRect(ox + 7.5, oy + 7.5, ow - 15, oh - 15);
+  ctx.globalAlpha = 1;
+
+  const arm = Math.min(28, ow * 0.1, oh * 0.1);
   const corners: [number, number, number, number][] = [
     [ox, oy, 1, 1],
     [ox + ow, oy, -1, 1],
@@ -78,7 +103,7 @@ function drawOtantikMapFrame(
     [ox + ow, oy + oh, -1, -1],
   ];
   ctx.strokeStyle = stamp;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2.5;
   ctx.lineCap = 'square';
   for (const [cx, cy, sx, sy] of corners) {
     ctx.beginPath();
@@ -86,6 +111,16 @@ function drawOtantikMapFrame(
     ctx.lineTo(cx, cy);
     ctx.lineTo(cx, cy + sy * arm);
     ctx.stroke();
+    /* Second thinner copper L inset */
+    ctx.beginPath();
+    ctx.strokeStyle = copperBright;
+    ctx.lineWidth = 1.2;
+    ctx.moveTo(cx + sx * (arm * 0.7), cy + sy * 3);
+    ctx.lineTo(cx + sx * 3, cy + sy * 3);
+    ctx.lineTo(cx + sx * 3, cy + sy * (arm * 0.7));
+    ctx.stroke();
+    ctx.strokeStyle = stamp;
+    ctx.lineWidth = 2.5;
   }
 
   const rivets: [number, number][] = [
@@ -100,12 +135,20 @@ function drawOtantikMapFrame(
   ];
   for (const [rx, ry] of rivets) {
     ctx.beginPath();
-    ctx.fillStyle = stamp;
-    ctx.arc(rx, ry, 2.4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(28, 18, 10, 0.35)';
+    ctx.arc(rx + 0.6, ry + 0.8, 3.2, 0, Math.PI * 2);
+    ctx.fill();
+    const g = ctx.createRadialGradient(rx - 0.8, ry - 0.8, 0.2, rx, ry, 3);
+    g.addColorStop(0, copperBright);
+    g.addColorStop(0.45, stamp);
+    g.addColorStop(1, '#6e3818');
+    ctx.beginPath();
+    ctx.fillStyle = g;
+    ctx.arc(rx, ry, 2.8, 0, Math.PI * 2);
     ctx.fill();
     ctx.beginPath();
-    ctx.fillStyle = copperBright;
-    ctx.arc(rx - 0.5, ry - 0.5, 0.9, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 220, 160, 0.45)';
+    ctx.arc(rx - 0.7, ry - 0.7, 0.85, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.restore();
@@ -283,6 +326,7 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
     originMapY: number;
   } | null>(null);
   const parchmentRef = useRef<HTMLImageElement | null>(null);
+  const woodRef = useRef<HTMLImageElement | null>(null);
   const mapCacheRef = useRef<HTMLCanvasElement | null>(null);
   const mapCacheKeyRef = useRef('');
   const themeRef = useRef<ThemeId>(theme);
@@ -297,6 +341,13 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
     img.src = '/parchment-texture.png';
     img.onload = () => {
       parchmentRef.current = img;
+      setParchmentReady((n) => n + 1);
+    };
+    const wood = new Image();
+    wood.src = '/themes/otantik/wood-grain.jpg';
+    wood.onload = () => {
+      woodRef.current = wood;
+      mapCacheKeyRef.current = '';
       setParchmentReady((n) => n + 1);
     };
   }, []);
@@ -325,7 +376,7 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
 
     const parchment = parchmentRef.current;
     if (themeRef.current === 'otantik') {
-      drawOtantikWoodWash(ctx, mapW, mapH, mat);
+      drawOtantikWoodWash(ctx, mapW, mapH, mat, woodRef.current);
     } else if (mat.useParchmentTexture && parchment?.complete) {
       const pattern = ctx.createPattern(parchment, 'repeat');
       if (pattern) {
