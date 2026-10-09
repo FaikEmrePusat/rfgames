@@ -1,11 +1,13 @@
 import { useCallback, useRef, useState } from 'react';
 import type { GameConfig, GameState } from '@rfgames/shared';
 import {
+  canUndoTurn,
   createInitialGame,
   performClaim,
   performEndTurn,
   performOrderRoll,
   performTurnRoll,
+  performUndo,
 } from '@rfgames/shared';
 
 function cloneState(state: GameState): GameState {
@@ -17,6 +19,7 @@ export function useLocalGame() {
   const [orderRollIdx, setOrderRollIdx] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastConfigRef = useRef<GameConfig | null>(null);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -28,10 +31,17 @@ export function useLocalGame() {
   }, []);
 
   const startGame = useCallback((config: GameConfig) => {
+    lastConfigRef.current = config;
     const initial = createInitialGame(config);
     setGame(initial);
     setOrderRollIdx(0);
   }, []);
+
+  const playAgain = useCallback(() => {
+    const config = lastConfigRef.current;
+    if (!config) return;
+    startGame(config);
+  }, [startGame]);
 
   const rollOrderDice = useCallback((): number | null => {
     if (!game || game.phase !== 'roll_order') return null;
@@ -69,6 +79,14 @@ export function useLocalGame() {
     [game, showToast],
   );
 
+  const undoClaim = useCallback(() => {
+    if (!game || !canUndoTurn(game, game.currentPlayerIdx)) return;
+    const next = cloneState(game);
+    const result = performUndo(next, next.currentPlayerIdx);
+    if (!result.ok) return;
+    setGame(next);
+  }, [game]);
+
   const endTurn = useCallback(() => {
     if (!game) return;
     const next = cloneState(game);
@@ -82,18 +100,24 @@ export function useLocalGame() {
     setGame(null);
     setOrderRollIdx(0);
     setToast(null);
+    lastConfigRef.current = null;
   }, []);
+
+  const canUndo = !!game && canUndoTurn(game, game.currentPlayerIdx);
 
   return {
     game,
     orderRollIdx,
     toast,
     startGame,
+    playAgain,
     rollOrderDice,
     rollTurnDice,
     claimTile,
+    undoClaim,
     endTurn,
     leaveGame,
+    canUndo,
     setGame,
   };
 }

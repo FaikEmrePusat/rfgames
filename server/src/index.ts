@@ -12,11 +12,13 @@ import {
   endTurn,
   generateRoomCode,
   onMemberRemoved,
+  rematchGame,
   rollOrder,
   rollTurn,
   roomToSession,
   startGame,
   transferHostIfNeeded,
+  undoClaim,
   type Room,
   type RoomMember,
 } from './roomManager.js';
@@ -483,6 +485,32 @@ io.on('connection', (socket) => {
     const result = endTurn(room, ref.memberId);
     if (!result.ok) socket.emit('error', result.error);
     else broadcastGame(room);
+  });
+
+  socket.on('game:undo', () => {
+    const ref = socketToRoom.get(socket.id);
+    if (!ref) return;
+    const room = findRoom(ref.code);
+    if (!room?.game) return;
+
+    const result = undoClaim(room, ref.memberId);
+    if (!result.ok) socket.emit('error', result.error);
+    else broadcastGame(room);
+  });
+
+  socket.on('game:rematch', () => {
+    const ref = socketToRoom.get(socket.id);
+    if (!ref) return;
+    const room = findRoom(ref.code);
+    if (!room) return;
+
+    const result = rematchGame(room, ref.memberId);
+    if (!result.ok) {
+      socket.emit('error', result.error);
+      return;
+    }
+    broadcastGame(room);
+    broadcastRoom(room);
   });
 
   socket.on('room:leave', () => {

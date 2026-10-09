@@ -54,6 +54,7 @@ function tinyState(owners: (number | null)[][]): GameState {
     orderRollsPending: false,
     winnerIds: null,
     log: [],
+    turnUndoStack: [],
   };
 }
 

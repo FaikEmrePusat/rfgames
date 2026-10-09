@@ -1,4 +1,4 @@
-import type { GameConfig, GameState } from './types.js';
+import type { GameConfig, GameState, MapSize } from './types.js';
 import { createMapForConfig } from './mapGenerator.js';
 import { createPlayers } from './rules.js';
 
@@ -31,6 +31,27 @@ export function createInitialGame(config: GameConfig): GameState {
     orderRollsPending: true,
     winnerIds: null,
     log: [`Harita oluşturuldu: ${islands.length} ada, ${totalLand} kara karesi.`],
+    turnUndoStack: [],
+  };
+}
+
+/** Aynı oyuncu/bot yapılandırmasıyla yeni harita (yeniden oyna). */
+export function createRematchGame(config: GameConfig): GameState {
+  return createInitialGame(config);
+}
+
+/** Oyun durumundan yeniden-oyna yapılandırması (sıra zarı sonrası sıralama korunur). */
+export function rematchConfigFromState(game: GameState, mapSize: MapSize): GameConfig {
+  const hasMembers = game.players.some((p) => p.memberId);
+  return {
+    mapSize,
+    playerCount: game.players.length,
+    playerNames: game.players.map((p) => p.name),
+    memberIds: hasMembers ? game.players.map((p) => p.memberId ?? '') : undefined,
+    bots: game.players.map((p) => ({
+      isBot: !!p.isBot,
+      botDifficulty: p.botDifficulty,
+    })),
   };
 }
 

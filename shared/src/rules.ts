@@ -248,6 +248,7 @@ export function advanceToNextPlayer(state: GameState): void {
   state.phase = 'roll';
   state.remainingSteps = 0;
   state.lastDiceRoll = null;
+  state.turnUndoStack = [];
 }
 
 export function applyDiceRoll(state: GameState, roll: number): void {

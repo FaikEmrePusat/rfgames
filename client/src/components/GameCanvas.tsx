@@ -128,10 +128,45 @@ function ownershipSignature(game: GameState): string {
   return `${game.gridCols}x${game.gridRows}|${game.bridges.length}|${parts.join(';')}`;
 }
 
+const MIN_ZOOM = 0.08;
+const MAX_ZOOM = 2.5;
+
+function pointerDistance(
+  a: { x: number; y: number },
+  b: { x: number; y: number },
+): number {
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
+  return Math.hypot(dx, dy);
+}
+
+function pointerMidpoint(
+  a: { x: number; y: number },
+  b: { x: number; y: number },
+) {
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
 export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const panRef = useRef({ x: 40, y: 40, zoom: 1, dragging: false, lastX: 0, lastY: 0, moved: false });
+  const panRef = useRef({
+    x: 40,
+    y: 40,
+    zoom: 1,
+    dragging: false,
+    lastX: 0,
+    lastY: 0,
+    moved: false,
+    pinching: false,
+  });
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{
+    startDist: number;
+    startZoom: number;
+    originMapX: number;
+    originMapY: number;
+  } | null>(null);
   const parchmentRef = useRef<HTMLImageElement | null>(null);
   const mapCacheRef = useRef<HTMLCanvasElement | null>(null);
   const mapCacheKeyRef = useRef('');
@@ -309,7 +344,7 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
 
     const scaleX = (w - padding * 2) / mapW;
     const scaleY = (h - padding * 2) / mapH;
-    panRef.current.zoom = Math.min(2.5, Math.max(0.08, Math.min(scaleX, scaleY)));
+    panRef.current.zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Math.min(scaleX, scaleY)));
 
     const scaledW = mapW * panRef.current.zoom;
     const scaledH = mapH * panRef.current.zoom;
@@ -317,6 +352,25 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
     panRef.current.y = (h - scaledH) / 2;
     draw();
   }, [draw]);
+
+  const zoomAt = useCallback(
+    (clientX: number, clientY: number, newZoom: number) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const cx = clientX - rect.left;
+      const cy = clientY - rect.top;
+      const oldZoom = panRef.current.zoom;
+      const clamped = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, newZoom));
+      const mapX = (cx - panRef.current.x) / oldZoom;
+      const mapY = (cy - panRef.current.y) / oldZoom;
+      panRef.current.zoom = clamped;
+      panRef.current.x = cx - mapX * clamped;
+      panRef.current.y = cy - mapY * clamped;
+      scheduleDraw();
+    },
+    [scheduleDraw],
+  );
 
   useEffect(() => {
     const container = containerRef.current;
@@ -347,6 +401,20 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
     };
   }, []);
 
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const factor = e.deltaY > 0 ? 0.9 : 1.1;
+      zoomAt(e.clientX, e.clientY, panRef.current.zoom * factor);
+    };
+
+    canvas.addEventListener('wheel', onWheel, { passive: false });
+    return () => canvas.removeEventListener('wheel', onWheel);
+  }, [zoomAt]);
+
   const screenToCell = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
@@ -365,15 +433,84 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
     return { r, c };
   };
 
+  const beginPinch = () => {
+    const pts = [...pointersRef.current.values()];
+    if (pts.length < 2) return;
+    const [a, b] = pts;
+    const dist = pointerDistance(a, b);
+    if (dist < 8) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const mid = pointerMidpoint(a, b);
+    const cx = mid.x - rect.left;
+    const cy = mid.y - rect.top;
+
+    pinchRef.current = {
+      startDist: dist,
+      startZoom: panRef.current.zoom,
+      originMapX: (cx - panRef.current.x) / panRef.current.zoom,
+      originMapY: (cy - panRef.current.y) / panRef.current.zoom,
+    };
+    panRef.current.pinching = true;
+    panRef.current.dragging = false;
+    panRef.current.moved = true;
+  };
+
+  const updatePinch = () => {
+    const pinch = pinchRef.current;
+    const pts = [...pointersRef.current.values()];
+    if (!pinch || pts.length < 2) return;
+
+    const [a, b] = pts;
+    const dist = pointerDistance(a, b);
+    if (dist < 8) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const mid = pointerMidpoint(a, b);
+    const cx = mid.x - rect.left;
+    const cy = mid.y - rect.top;
+
+    const newZoom = Math.min(
+      MAX_ZOOM,
+      Math.max(MIN_ZOOM, pinch.startZoom * (dist / pinch.startDist)),
+    );
+    panRef.current.zoom = newZoom;
+    panRef.current.x = cx - pinch.originMapX * newZoom;
+    panRef.current.y = cy - pinch.originMapY * newZoom;
+    scheduleDraw();
+  };
+
   const handlePointerDown = (e: React.PointerEvent) => {
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointersRef.current.size >= 2) {
+      beginPinch();
+      return;
+    }
+
     panRef.current.dragging = true;
     panRef.current.lastX = e.clientX;
     panRef.current.lastY = e.clientY;
     panRef.current.moved = false;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    panRef.current.pinching = false;
+    pinchRef.current = null;
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
+    if (!pointersRef.current.has(e.pointerId)) return;
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointersRef.current.size >= 2 || panRef.current.pinching) {
+      if (!pinchRef.current) beginPinch();
+      updatePinch();
+      return;
+    }
+
     if (!panRef.current.dragging) return;
     const dx = e.clientX - panRef.current.lastX;
     const dy = e.clientY - panRef.current.lastY;
@@ -386,26 +523,40 @@ export function GameCanvas({ game, onClaim, highlightValid = true }: Props) {
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
-    if (!panRef.current.moved) {
-      const cell = screenToCell(e.clientX, e.clientY);
-      if (cell) onClaim(cell.r, cell.c);
+    const wasPinching = panRef.current.pinching;
+    const wasMoved = panRef.current.moved;
+    pointersRef.current.delete(e.pointerId);
+
+    if (pointersRef.current.size < 2) {
+      pinchRef.current = null;
+      panRef.current.pinching = false;
     }
-    panRef.current.dragging = false;
+
+    if (pointersRef.current.size === 1) {
+      const remaining = [...pointersRef.current.values()][0]!;
+      panRef.current.dragging = true;
+      panRef.current.lastX = remaining.x;
+      panRef.current.lastY = remaining.y;
+      panRef.current.moved = true;
+      return;
+    }
+
+    if (pointersRef.current.size === 0) {
+      if (!wasPinching && !wasMoved) {
+        const cell = screenToCell(e.clientX, e.clientY);
+        if (cell) onClaim(cell.r, cell.c);
+      }
+      panRef.current.dragging = false;
+    }
   };
 
   const zoomBy = (delta: number) => {
     const container = containerRef.current;
     if (!container) return;
-    const cx = container.clientWidth / 2;
-    const cy = container.clientHeight / 2;
-    const oldZoom = panRef.current.zoom;
-    const newZoom = Math.min(2.5, Math.max(0.08, oldZoom + delta));
-    const mapX = (cx - panRef.current.x) / oldZoom;
-    const mapY = (cy - panRef.current.y) / oldZoom;
-    panRef.current.zoom = newZoom;
-    panRef.current.x = cx - mapX * newZoom;
-    panRef.current.y = cy - mapY * newZoom;
-    draw();
+    const rect = container.getBoundingClientRect();
+    const cx = rect.left + container.clientWidth / 2;
+    const cy = rect.top + container.clientHeight / 2;
+    zoomAt(cx, cy, panRef.current.zoom + delta);
   };
 
   return (

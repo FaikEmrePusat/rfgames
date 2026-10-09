@@ -9,10 +9,12 @@ import {
 import { createMapForConfig } from './mapGenerator.js';
 import { createInitialGame } from './gameFactory.js';
 import {
+  canUndoTurn,
   performClaim,
   performEndTurn,
   performOrderRoll,
   performTurnRoll,
+  performUndo,
 } from './turnOrchestrator.js';
 
 function land(r: number, c: number, owner: number | null = null, islandId = 0): Cell {
@@ -75,6 +77,7 @@ function tinyState(owners: (number | null)[][]): GameState {
     orderRollsPending: false,
     winnerIds: null,
     log: [],
+    turnUndoStack: [],
   };
 }
 
@@ -254,5 +257,32 @@ describe('turnOrchestrator', () => {
     expect(performEndTurn(state, 1).ok).toBe(false);
     expect(performEndTurn(state, 0).ok).toBe(true);
     expect(state.currentPlayerIdx).toBe(1);
+  });
+
+  it('undo restores claim and clears after endTurn', () => {
+    const state = tinyState([
+      [0, null],
+      [null, null],
+    ]);
+    state.phase = 'claim';
+    state.remainingSteps = 2;
+    state.lastDiceRoll = 2;
+
+    expect(performClaim(state, 0, 0, 1).ok).toBe(true);
+    expect(state.grid[0][1]!.owner).toBe(0);
+    expect(state.remainingSteps).toBe(1);
+    expect(canUndoTurn(state, 0)).toBe(true);
+
+    expect(performUndo(state, 0).ok).toBe(true);
+    expect(state.grid[0][1]!.owner).toBe(null);
+    expect(state.remainingSteps).toBe(2);
+    expect(state.phase).toBe('claim');
+    expect(canUndoTurn(state, 0)).toBe(false);
+
+    expect(performClaim(state, 0, 0, 1).ok).toBe(true);
+    state.phase = 'turn_complete';
+    expect(performEndTurn(state, 0).ok).toBe(true);
+    expect(state.turnUndoStack).toHaveLength(0);
+    expect(canUndoTurn(state, 1)).toBe(false);
   });
 });

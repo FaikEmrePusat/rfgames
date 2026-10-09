@@ -13,9 +13,15 @@ interface Props {
   toast: string | null;
   canInteract: boolean;
   myLabel?: string;
+  canUndo?: boolean;
+  /** Yeniden oyna — yerel veya online host */
+  onPlayAgain?: () => void;
+  /** Online: host değilse yeniden oyna bekleniyor */
+  rematchWaiting?: boolean;
   onRollOrder: () => number | null | void;
   onRollDice: () => number | null | void;
   onClaim: (r: number, c: number) => void;
+  onUndo?: () => void;
   onEndTurn: () => void;
   onLeave: () => void;
 }
@@ -35,9 +41,13 @@ export function GameScreen({
   toast,
   canInteract,
   myLabel,
+  canUndo = false,
+  onPlayAgain,
+  rematchWaiting = false,
   onRollOrder,
   onRollDice,
   onClaim,
+  onUndo,
   onEndTurn,
   onLeave,
 }: Props) {
@@ -280,6 +290,16 @@ export function GameScreen({
                 </div>
               </div>
             )}
+            {canUndo && onUndo && (game.phase === 'claim' || game.phase === 'turn_complete') && (
+              <button
+                type="button"
+                disabled={!isMyTurn}
+                onClick={onUndo}
+                className="btn-ghost"
+              >
+                Geri al
+              </button>
+            )}
             {game.phase === 'turn_complete' && (
               <button
                 type="button"
@@ -370,9 +390,19 @@ export function GameScreen({
                 currentPlayerId={-1}
               />
             </div>
-            <button type="button" onClick={onLeave} className="btn-primary mt-4 w-full text-xl">
-              Ana menüye dön
-            </button>
+            <div className="mt-4 flex flex-col gap-2">
+              {onPlayAgain && (
+                <button type="button" onClick={onPlayAgain} className="btn-primary w-full text-xl">
+                  Yeniden oyna
+                </button>
+              )}
+              {rematchWaiting && !onPlayAgain && (
+                <p className="hand-note text-base mb-0">Host yeniden başlatacak…</p>
+              )}
+              <button type="button" onClick={onLeave} className="btn-ghost w-full text-xl">
+                Ana menüye dön
+              </button>
+            </div>
           </div>
         </div>
       )}

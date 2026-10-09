@@ -6,6 +6,7 @@ import {
   performEndTurn,
   performOrderRoll,
   performTurnRoll,
+  performUndo,
   playerIdForMember,
 } from '@rfgames/shared';
 
@@ -131,6 +132,34 @@ export function endTurn(room: Room, memberId: string): { ok: boolean; error?: st
   if (playerId === null) return { ok: false, error: 'Sıra sizde değil' };
 
   return performEndTurn(game, playerId);
+}
+
+export function undoClaim(room: Room, memberId: string): { ok: boolean; error?: string } {
+  const game = room.game;
+  if (!game) return { ok: false, error: 'Oyun yok' };
+  const playerId = memberToPlayerId(room, memberId);
+  if (playerId === null) return { ok: false, error: 'Sıra sizde değil' };
+
+  const next = cloneState(game);
+  const result = performUndo(next, playerId);
+  if (!result.ok) return { ok: false, error: result.error };
+
+  room.game = next;
+  return { ok: true };
+}
+
+/** Host, oyun bittikten sonra aynı odada yeni harita başlatır. */
+export function rematchGame(room: Room, memberId: string): { ok: boolean; error?: string } {
+  if (room.hostId !== memberId) return { ok: false, error: 'Yalnızca host yeniden başlatabilir' };
+  if (!room.game || room.game.phase !== 'game_over') {
+    return { ok: false, error: 'Yeniden oyna yalnızca oyun bitince' };
+  }
+  if (room.members.filter((m) => m.connected).length < 2) {
+    return { ok: false, error: 'En az 2 bağlı oyuncu gerekli' };
+  }
+
+  startGame(room);
+  return { ok: true };
 }
 
 /** Host düşerse sıradaki bağlı üyeye aktar (Kapmaca + Katla-Çiz). */

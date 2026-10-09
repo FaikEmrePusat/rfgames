@@ -62,6 +62,17 @@ export interface GameConfig {
   bots?: PlayerBotConfig[];
 }
 
+/** Bir fetih hamlesinden önce kaydedilen tur içi geri-al anlığı. */
+export interface TurnUndoSnapshot {
+  owners: Array<{ r: number; c: number; owner: number | null }>;
+  scores: number[];
+  unclaimedLandTiles: number;
+  remainingSteps: number;
+  phase: TurnPhase;
+  winnerIds: number[] | null;
+  logLength: number;
+}
+
 export interface GameState {
   gridCols: number;
   gridRows: number;
@@ -79,6 +90,8 @@ export interface GameState {
   orderRollsPending: boolean;
   winnerIds: number[] | null;
   log: string[];
+  /** Bu turda yapılan fetihler; tur bitince temizlenir. */
+  turnUndoStack: TurnUndoSnapshot[];
 }
 
 export const PLAYER_COLORS = [

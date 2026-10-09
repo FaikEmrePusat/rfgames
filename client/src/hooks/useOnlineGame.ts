@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import type { GameState, MapSize } from '@rfgames/shared';
-import { playerIdForMember } from '@rfgames/shared';
+import { canUndoTurn, playerIdForMember } from '@rfgames/shared';
 import type { OnlineLobbyOptions } from '../components/LobbyScreen';
 
 /** Dev: localhost API. Prod (unset VITE_SERVER_URL): same origin for single-service deploy. */
@@ -180,6 +180,14 @@ export function useOnlineGame() {
     socketRef.current?.emit('game:endTurn');
   }, []);
 
+  const undoClaim = useCallback(() => {
+    socketRef.current?.emit('game:undo');
+  }, []);
+
+  const rematch = useCallback(() => {
+    socketRef.current?.emit('game:rematch');
+  }, []);
+
   const leave = useCallback(() => {
     socketRef.current?.emit('room:leave');
     saveSession(null);
@@ -198,6 +206,11 @@ export function useOnlineGame() {
     return pid !== null && game.currentPlayerIdx === pid;
   })();
 
+  const myPlayerId =
+    session && game ? playerIdForMember(game, session.memberId) : null;
+  const canUndo =
+    !!game && myPlayerId !== null && canUndoTurn(game, myPlayerId);
+
   return {
     session,
     game,
@@ -211,9 +224,12 @@ export function useOnlineGame() {
     rollOrderDice,
     rollTurnDice,
     claimTile,
+    undoClaim,
     endTurn,
+    rematch,
     leave,
     canInteract: !!canInteract,
+    canUndo,
     setOrderRollIdx,
   };
 }

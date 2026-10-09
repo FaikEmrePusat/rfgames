@@ -209,10 +209,13 @@ export default function App() {
             orderRollIdx={local.orderRollIdx}
             toast={local.toast}
             canInteract
+            canUndo={local.canUndo}
             onRollOrder={local.rollOrderDice}
             onRollDice={local.rollTurnDice}
             onClaim={local.claimTile}
+            onUndo={local.undoClaim}
             onEndTurn={local.endTurn}
+            onPlayAgain={local.playAgain}
             onLeave={local.leaveGame}
           />
         )}
@@ -224,10 +227,14 @@ export default function App() {
             toast={online.toast}
             canInteract={online.canInteract}
             myLabel="online"
+            canUndo={online.canUndo}
             onRollOrder={online.rollOrderDice}
             onRollDice={online.rollTurnDice}
             onClaim={online.claimTile}
+            onUndo={online.undoClaim}
             onEndTurn={online.endTurn}
+            onPlayAgain={online.session.isHost ? online.rematch : undefined}
+            rematchWaiting={!online.session.isHost}
             onLeave={online.leave}
           />
         )}
