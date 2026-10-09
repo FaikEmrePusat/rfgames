@@ -497,6 +497,14 @@
   box-shadow: var(--shadow-lift);
 }
 
+/* Portaled above app-shell stacking so main cannot intercept clicks */
+.theme-picker__popover--portal {
+  position: fixed;
+  top: auto;
+  right: auto;
+  z-index: 100;
+}
+
 .theme-picker__popover .theme-picker__rail {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-1_5);
