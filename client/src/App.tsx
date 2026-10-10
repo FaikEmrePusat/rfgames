@@ -9,6 +9,7 @@ import { useLocalGame } from './hooks/useLocalGame';
 import { useOnlineGame } from './hooks/useOnlineGame';
 import { useLocalFoldDraw } from './hooks/useLocalFoldDraw';
 import { useOnlineFoldDraw } from './hooks/useOnlineFoldDraw';
+import { ActivePlayersHint } from './components/ActivePlayersHint';
 import { ThemePicker } from './theme/ThemePicker';
 import { useTheme } from './theme/useTheme';
 
@@ -97,6 +98,7 @@ export default function App() {
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            <ActivePlayersHint />
             <ThemePicker theme={theme} onChange={setTheme} variant="menu" />
             {canReturnHome && (
               <button type="button" onClick={goHub} className="btn-ghost">

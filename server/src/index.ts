@@ -78,7 +78,16 @@ app.use(
     origin: ALLOWED_ORIGINS,
   }),
 );
-app.get('/health', (_req, res) => res.json({ ok: true }));
+/**
+ * aktifPlayers = currently connected Socket.io clients (open websocket/polling
+ * sessions), not unique in-room members. Hub visitors without an online socket
+ * are not counted. Updated after `io` is created below.
+ */
+let activePlayerCount = (): number => 0;
+
+app.get('/health', (_req, res) => {
+  res.json({ ok: true, activePlayers: activePlayerCount() });
+});
 
 function mountClientStatic() {
   if (process.env.SERVE_CLIENT === '0') return;
@@ -106,6 +115,8 @@ const io = new Server(httpServer, {
   /** Section PNG data URLs need headroom beyond default 1MB. */
   maxHttpBufferSize: 2e6,
 });
+/** Connected Socket.io sockets in the default namespace (= "aktif oyuncu"). */
+activePlayerCount = () => io.sockets.sockets.size;
 const rooms = new Map<string, Room>();
 const foldRooms = new Map<string, FoldRoom>();
 const socketToRoom = new Map<string, { code: string; memberId: string }>();
