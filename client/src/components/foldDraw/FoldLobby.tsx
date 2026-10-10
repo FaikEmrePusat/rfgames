@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { filterRoomCodeInput, normalizeRoomCode, ROOM_CODE_MAX_LEN } from '../../lib/roomCode';
 import type { FoldGameConfig } from '@rfgames/shared';
 import { clampFoldPlayerCount } from '@rfgames/shared';
 import type { FoldOnlineCreateOpts } from '../../hooks/useOnlineFoldDraw';
@@ -65,14 +66,31 @@ export function FoldLobby({
           <input
             type="text"
             value={joinCode}
-            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+            onChange={(e) => {
+              const composing =
+                (e.nativeEvent as InputEvent).isComposing === true;
+              setJoinCode(filterRoomCodeInput(e.target.value, composing));
+            }}
+            onBlur={() => setJoinCode((c) => normalizeRoomCode(c))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                onJoinOnline(normalizeRoomCode(joinCode), onlineName);
+              }
+            }}
+            maxLength={ROOM_CODE_MAX_LEN}
+            autoCapitalize="characters"
+            autoCorrect="off"
+            spellCheck={false}
+            inputMode="text"
+            autoComplete="off"
             placeholder="oda kodu"
             className="ink-input text-center uppercase tracking-[0.2em] !text-[var(--stamp)]"
             aria-label="Oda kodu"
           />
           <button
             type="button"
-            onClick={() => onJoinOnline(joinCode.trim(), onlineName)}
+            onClick={() => onJoinOnline(normalizeRoomCode(joinCode), onlineName)}
             className="btn-success"
           >
             Katıl
