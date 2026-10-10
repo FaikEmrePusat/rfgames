@@ -1,9 +1,9 @@
 import type { FoldGameState } from '@rfgames/shared';
 import {
-  FOLD_LAYER_HEIGHT_PX,
   FOLD_LAYER_WIDTH_PX,
   FOLD_PAPER_HEIGHT_PX,
   FOLD_SECTION_COUNT,
+  foldSectionBandPx,
 } from '@rfgames/shared';
 
 function loadImage(url: string): Promise<HTMLImageElement> {
@@ -42,8 +42,8 @@ export async function downloadFoldPaperPng(
     if (!url) continue;
     try {
       const img = await loadImage(url);
-      const y0 = s * FOLD_LAYER_HEIGHT_PX;
-      ctx.drawImage(img, 0, y0, w, FOLD_LAYER_HEIGHT_PX);
+      const band = foldSectionBandPx(s);
+      ctx.drawImage(img, band.x, band.y, band.w, band.h);
     } catch {
       /* skip broken layer */
     }
@@ -52,7 +52,7 @@ export async function downloadFoldPaperPng(
   ctx.strokeStyle = 'rgba(90,60,30,0.18)';
   ctx.setLineDash([8, 8]);
   for (let i = 1; i < FOLD_SECTION_COUNT; i++) {
-    const y = i * FOLD_LAYER_HEIGHT_PX;
+    const y = foldSectionBandPx(i).y;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(w, y);

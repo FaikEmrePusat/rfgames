@@ -1,4 +1,6 @@
 import {
+  FOLD_LAYER_HEIGHT_PX,
+  FOLD_LAYER_WIDTH_PX,
   FOLD_PAPER_HEIGHT_OVER_WIDTH,
   FOLD_PLAYER_COLORS,
   FOLD_SECTION_COUNT,
@@ -49,6 +51,25 @@ export function activeSectionBounds(section: FoldSectionIndex) {
   return sectionYRange(section);
 }
 
+export function clampPeekRatio(peekRatio: number): number {
+  return Math.min(0.25, Math.max(0.04, peekRatio));
+}
+
+/** Integer peek strip height in layer pixels (exact row count). */
+export function peekStripHeightPx(peekRatio: number): number {
+  return Math.max(1, Math.round(FOLD_LAYER_HEIGHT_PX * clampPeekRatio(peekRatio)));
+}
+
+/** Pixel rect of section `section` on the full paper raster (zero gap/overlap). */
+export function foldSectionBandPx(section: number): { x: number; y: number; w: number; h: number } {
+  return {
+    x: 0,
+    y: section * FOLD_LAYER_HEIGHT_PX,
+    w: FOLD_LAYER_WIDTH_PX,
+    h: FOLD_LAYER_HEIGHT_PX,
+  };
+}
+
 export function peekBounds(
   section: FoldSectionIndex,
   peekRatio: number,
@@ -57,20 +78,23 @@ export function peekBounds(
   const prev = (section - 1) as FoldSectionIndex;
   const { y0, y1 } = sectionYRange(prev);
   const h = y1 - y0;
-  const ratio = Math.min(0.25, Math.max(0.04, peekRatio));
+  const ratio = clampPeekRatio(peekRatio);
   return { y0: y1 - h * ratio, y1 };
 }
 
 /**
- * Visible paper Y band while drawing: active section only.
- * Previous-section peek continuity is composited as a non-erasable underlay
- * inside the top of this band (see FoldCanvas), not as an extra strip above.
+ * Visible paper Y band while drawing: peek strip (if any) + active section.
+ * Peek sits ABOVE the crease (previous section's true bottom) so artists connect
+ * at the same paper Y that becomes the fold on reveal. Peek is non-erasable
+ * because pointer mapping (toPaper) rejects y < active.y0.
  */
 export function drawingViewBand(
   section: FoldSectionIndex,
-  _peekRatio: number,
+  peekRatio: number,
 ): { y0: number; y1: number } {
-  return activeSectionBounds(section);
+  const active = activeSectionBounds(section);
+  const peek = peekBounds(section, peekRatio);
+  return { y0: peek ? peek.y0 : active.y0, y1: active.y1 };
 }
 
 /**

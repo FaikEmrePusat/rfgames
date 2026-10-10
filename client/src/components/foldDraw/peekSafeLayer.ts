@@ -1,19 +1,20 @@
 import {
   FOLD_LAYER_HEIGHT_PX,
   FOLD_LAYER_WIDTH_PX,
+  peekStripHeightPx,
 } from '@rfgames/shared';
 
 /**
  * Builds a section-sized PNG where only the bottom `peekRatio` strip has ink.
  * Safe to send to the next artist: full previous art above the peek is blank.
- * FoldCanvas maps that bottom strip into a non-erasable underlay at the TOP of
- * the current drawable section (same layer pixel size → reveal stitches cleanly).
+ * FoldCanvas blits that strip into paper-space peek ABOVE the crease (not remapped
+ * into the current section top). Exact integer row count via peekStripHeightPx.
  */
 export function buildPeekSafeLayer(
   sectionDataUrl: string,
   peekRatio: number,
 ): Promise<string> {
-  const ratio = Math.min(0.25, Math.max(0.04, peekRatio));
+  const peekH = peekStripHeightPx(peekRatio);
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
@@ -26,19 +27,19 @@ export function buildPeekSafeLayer(
         return;
       }
       const srcH = img.height || FOLD_LAYER_HEIGHT_PX;
-      const srcY0 = srcH * (1 - ratio);
-      const dstY0 = FOLD_LAYER_HEIGHT_PX * (1 - ratio);
+      const srcY0 = srcH - peekH;
+      const dstY0 = FOLD_LAYER_HEIGHT_PX - peekH;
       ctx.clearRect(0, 0, FOLD_LAYER_WIDTH_PX, FOLD_LAYER_HEIGHT_PX);
       ctx.drawImage(
         img,
         0,
         srcY0,
         img.width || FOLD_LAYER_WIDTH_PX,
-        srcH - srcY0,
+        peekH,
         0,
         dstY0,
         FOLD_LAYER_WIDTH_PX,
-        FOLD_LAYER_HEIGHT_PX - dstY0,
+        peekH,
       );
       resolve(canvas.toDataURL('image/png'));
     };

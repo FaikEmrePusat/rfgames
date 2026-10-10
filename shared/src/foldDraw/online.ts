@@ -50,9 +50,9 @@ export function isCurrentFoldArtist(state: FoldGameState, memberId: string): boo
  * Reveal sends full layers.
  *
  * `peekSafeLayers[i]` must be a section-sized PNG where only the bottom peek
- * strip has ink (rest transparent). FoldCanvas blits that strip into a
- * non-erasable underlay at the top of the current section without leaking
- * the rest of the previous art.
+ * strip has ink (rest transparent). FoldCanvas shows that strip above the crease
+ * in paper space (not as an underlay inside the current section top) without
+ * leaking the rest of the previous art.
  */
 export function filterFoldStateForMember(
   state: FoldGameState,

@@ -5,7 +5,9 @@ import {
   createFoldGame,
   drawingViewBand,
   foldBandHeightOverWidth,
+  foldSectionBandPx,
   peekBounds,
+  peekStripHeightPx,
   sectionHasInk,
   sectionYRange,
   setSectionLayer,
@@ -135,13 +137,33 @@ describe('foldDraw paper metrics', () => {
     expect(foldBandHeightOverWidth(band)).toBeCloseTo(0.625);
   });
 
-  it('draw with peek keeps active-section aspect (peek is underlay inside band)', () => {
+  it('draw with peek extends viewport above crease (peek + active)', () => {
     const band = drawingViewBand(1, 0.1);
-    // Peek continuity lives inside the section top; viewport is one section band.
-    expect(band.y1 - band.y0).toBeCloseTo(0.25);
-    expect(foldBandHeightOverWidth(band)).toBeCloseTo(FOLD_SECTION_HEIGHT_OVER_WIDTH);
-    const peek = peekBounds(1, 0.1);
-    expect(peek).not.toBeNull();
-    expect(peek!.y1 - peek!.y0).toBeCloseTo(0.25 * 0.1);
+    const active = sectionYRange(1);
+    const peek = peekBounds(1, 0.1)!;
+    expect(band.y0).toBeCloseTo(peek.y0);
+    expect(band.y1).toBeCloseTo(active.y1);
+    expect(band.y1 - band.y0).toBeCloseTo(0.25 * 1.1);
+    expect(foldBandHeightOverWidth(band)).toBeCloseTo(FOLD_PAPER_HEIGHT_OVER_WIDTH * (band.y1 - band.y0));
+  });
+
+  it('section band pixel rects abut with zero gap/overlap', () => {
+    for (let i = 0; i < FOLD_SECTION_COUNT; i++) {
+      const b = foldSectionBandPx(i);
+      expect(b.x).toBe(0);
+      expect(b.w).toBe(FOLD_LAYER_WIDTH_PX);
+      expect(b.h).toBe(FOLD_LAYER_HEIGHT_PX);
+      expect(b.y).toBe(i * FOLD_LAYER_HEIGHT_PX);
+      if (i > 0) {
+        const prev = foldSectionBandPx(i - 1);
+        expect(prev.y + prev.h).toBe(b.y); // zero gap/overlap
+      }
+    }
+    expect(foldSectionBandPx(FOLD_SECTION_COUNT - 1).y + FOLD_LAYER_HEIGHT_PX).toBe(FOLD_PAPER_HEIGHT_PX);
+  });
+
+  it('peek strip height is exact integer rows within layer', () => {
+    expect(peekStripHeightPx(0.1)).toBe(50);
+    expect(peekStripHeightPx(0.1)).toBeLessThan(FOLD_LAYER_HEIGHT_PX);
   });
 });
