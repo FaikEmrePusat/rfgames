@@ -64,6 +64,25 @@ export function startFoldGame(room: FoldRoom): FoldGameState {
   return game;
 }
 
+/** Host, reveal sonrası aynı odada yeni kağıt başlatır. */
+export function rematchFoldGame(
+  room: FoldRoom,
+  memberId: string,
+): { ok: boolean; error?: string } {
+  if (room.hostId !== memberId) {
+    return { ok: false, error: 'Yalnızca host yeniden başlatabilir' };
+  }
+  if (!room.game || room.game.phase !== 'reveal') {
+    return { ok: false, error: 'Yeniden oyna yalnızca açılıştan sonra' };
+  }
+  if (room.members.filter((m) => m.connected).length < 2) {
+    return { ok: false, error: 'En az 2 bağlı oyuncu gerekli' };
+  }
+
+  startFoldGame(room);
+  return { ok: true };
+}
+
 export function submitFoldSection(
   room: FoldRoom,
   memberId: string,

@@ -6,13 +6,21 @@ export function useLocalFoldDraw() {
   const [game, setGame] = useState<FoldGameState | null>(null);
   /** Per-section undo stacks of previous layer data URLs ('' = empty). */
   const historyRef = useRef<Record<number, string[]>>({});
+  const lastConfigRef = useRef<FoldGameConfig | null>(null);
   const [undoTick, setUndoTick] = useState(0);
 
   const startGame = useCallback((config: FoldGameConfig) => {
+    lastConfigRef.current = config;
     historyRef.current = {};
     setUndoTick((n) => n + 1);
     setGame(createFoldGame(config));
   }, []);
+
+  const playAgain = useCallback(() => {
+    const config = lastConfigRef.current;
+    if (!config) return;
+    startGame(config);
+  }, [startGame]);
 
   const commitLayer = useCallback((dataUrl: string) => {
     setGame((g) => {
@@ -55,5 +63,5 @@ export function useLocalFoldDraw() {
     (historyRef.current[game.currentSection]?.length ?? 0) > 0 &&
     undoTick >= 0;
 
-  return { game, startGame, commitLayer, undo, foldAndPass, leave, canUndo };
+  return { game, startGame, playAgain, commitLayer, undo, foldAndPass, leave, canUndo };
 }

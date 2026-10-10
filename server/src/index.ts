@@ -27,6 +27,7 @@ import {
   filteredFoldState,
   foldRoomToSession,
   onFoldMemberRemoved,
+  rematchFoldGame,
   startFoldGame,
   submitFoldSection,
   type FoldRoom,
@@ -669,6 +670,21 @@ io.on('connection', (socket) => {
     if (room.game) return;
 
     startFoldGame(room);
+    broadcastFoldGame(room);
+    broadcastFoldRoom(room);
+  });
+
+  socket.on('fold:rematch', () => {
+    const ref = socketToFoldRoom.get(socket.id);
+    if (!ref) return;
+    const room = findFoldRoom(ref.code);
+    if (!room) return;
+
+    const result = rematchFoldGame(room, ref.memberId);
+    if (!result.ok) {
+      socket.emit('error', result.error);
+      return;
+    }
     broadcastFoldGame(room);
     broadcastFoldRoom(room);
   });

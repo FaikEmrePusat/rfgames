@@ -183,6 +183,12 @@ export function useOnlineFoldDraw() {
     socketRef.current?.emit('fold:start');
   }, []);
 
+  const rematch = useCallback(() => {
+    clearLocalInk();
+    setError(null);
+    socketRef.current?.emit('fold:rematch');
+  }, [clearLocalInk]);
+
   const isMyTurn =
     !!session &&
     !!serverGame &&
@@ -271,6 +277,7 @@ export function useOnlineFoldDraw() {
     createRoom,
     joinRoom,
     startOnlineGame,
+    rematch,
     commitLayer,
     undo,
     foldAndPass,

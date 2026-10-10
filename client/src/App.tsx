@@ -126,25 +126,22 @@ export default function App() {
             onUndo={fold.undo}
             onFold={fold.foldAndPass}
             onLeave={goHub}
-            onNewDrawing={() => {
-              fold.leave();
-              setMode('fold');
-            }}
+            onNewDrawing={fold.playAgain}
             canUndo={fold.canUndo}
           />
         )}
 
-        {mode === 'fold' && inFoldOnlineGame && foldOnline.game && (
+        {mode === 'fold' && inFoldOnlineGame && foldOnline.game && foldOnline.session && (
           <FoldGameScreen
             game={foldOnline.game}
             onCommitLayer={foldOnline.commitLayer}
             onUndo={foldOnline.undo}
             onFold={foldOnline.foldAndPass}
             onLeave={goHub}
-            onNewDrawing={() => {
-              foldOnline.leave();
-              setMode('fold');
-            }}
+            onNewDrawing={
+              foldOnline.session.isHost ? foldOnline.rematch : undefined
+            }
+            rematchWaiting={!foldOnline.session.isHost}
             canUndo={foldOnline.canUndo}
             canDraw={foldOnline.isMyTurn}
             foldBusy={foldOnline.submitting}

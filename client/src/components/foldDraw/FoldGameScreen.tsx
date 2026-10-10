@@ -20,7 +20,10 @@ interface Props {
   onUndo: () => void;
   onFold: () => void | Promise<void>;
   onLeave: () => void;
-  onNewDrawing: () => void;
+  /** Host / local: start a new paper. Omit for online guests waiting on host. */
+  onNewDrawing?: () => void;
+  /** Online guest after reveal: host will rematch. */
+  rematchWaiting?: boolean;
   canUndo: boolean;
   /** Online: false while waiting for another player's section. Default true (local). */
   canDraw?: boolean;
@@ -34,6 +37,7 @@ export function FoldGameScreen({
   onFold,
   onLeave,
   onNewDrawing,
+  rematchWaiting = false,
   canUndo,
   canDraw: canDrawProp,
   foldBusy = false,
@@ -232,14 +236,19 @@ export function FoldGameScreen({
           >
             İndir
           </button>
-          <button
-            type="button"
-            className="btn-primary fold-dock-cta"
-            disabled={!revealSettled}
-            onClick={onNewDrawing}
-          >
-            Yeni
-          </button>
+          {onNewDrawing && (
+            <button
+              type="button"
+              className="btn-primary fold-dock-cta"
+              disabled={!revealSettled}
+              onClick={onNewDrawing}
+            >
+              Yeni
+            </button>
+          )}
+          {rematchWaiting && !onNewDrawing && (
+            <p className="fold-dock-wait hand-note mb-0">Host yeniden başlatacak…</p>
+          )}
           <button
             type="button"
             className="btn-ghost fold-dock-cta"
