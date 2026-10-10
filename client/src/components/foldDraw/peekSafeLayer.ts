@@ -6,7 +6,8 @@ import {
 /**
  * Builds a section-sized PNG where only the bottom `peekRatio` strip has ink.
  * Safe to send to the next artist: full previous art above the peek is blank.
- * Uses the same layer pixel size as FoldCanvas so reveal stitches without stretch.
+ * FoldCanvas maps that bottom strip into a non-erasable underlay at the TOP of
+ * the current drawable section (same layer pixel size → reveal stitches cleanly).
  */
 export function buildPeekSafeLayer(
   sectionDataUrl: string,

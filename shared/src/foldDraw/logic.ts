@@ -61,14 +61,16 @@ export function peekBounds(
   return { y0: y1 - h * ratio, y1 };
 }
 
-/** Visible paper Y band while drawing: peek strip (if any) + active section. */
+/**
+ * Visible paper Y band while drawing: active section only.
+ * Previous-section peek continuity is composited as a non-erasable underlay
+ * inside the top of this band (see FoldCanvas), not as an extra strip above.
+ */
 export function drawingViewBand(
   section: FoldSectionIndex,
-  peekRatio: number,
+  _peekRatio: number,
 ): { y0: number; y1: number } {
-  const active = activeSectionBounds(section);
-  const peek = peekBounds(section, peekRatio);
-  return { y0: peek ? peek.y0 : active.y0, y1: active.y1 };
+  return activeSectionBounds(section);
 }
 
 /**

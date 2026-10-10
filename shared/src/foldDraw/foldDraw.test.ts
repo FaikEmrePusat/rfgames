@@ -135,10 +135,13 @@ describe('foldDraw paper metrics', () => {
     expect(foldBandHeightOverWidth(band)).toBeCloseTo(0.625);
   });
 
-  it('draw with peek keeps band aspect tied to paper metrics', () => {
+  it('draw with peek keeps active-section aspect (peek is underlay inside band)', () => {
     const band = drawingViewBand(1, 0.1);
-    // peek 10% of previous section + full active section
-    expect(band.y1 - band.y0).toBeCloseTo(0.25 * 1.1);
-    expect(foldBandHeightOverWidth(band)).toBeCloseTo(2.5 * 0.25 * 1.1);
+    // Peek continuity lives inside the section top; viewport is one section band.
+    expect(band.y1 - band.y0).toBeCloseTo(0.25);
+    expect(foldBandHeightOverWidth(band)).toBeCloseTo(FOLD_SECTION_HEIGHT_OVER_WIDTH);
+    const peek = peekBounds(1, 0.1);
+    expect(peek).not.toBeNull();
+    expect(peek!.y1 - peek!.y0).toBeCloseTo(0.25 * 0.1);
   });
 });

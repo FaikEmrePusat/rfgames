@@ -79,6 +79,8 @@ export function FoldCanvas({
   const { theme } = useTheme();
   const displayRef = useRef<HTMLCanvasElement>(null);
   const layerRef = useRef<HTMLCanvasElement | null>(null);
+  /** Previous-section bottom strip, locked under the user layer (never erased). */
+  const peekUnderlayRef = useRef<HTMLCanvasElement | null>(null);
   const scratchRef = useRef<HTMLCanvasElement | null>(null);
   const strokeBaseRef = useRef<HTMLCanvasElement | null>(null);
   const strokePoints = useRef<StrokePoint[]>([]);
@@ -106,6 +108,11 @@ export function FoldCanvas({
     return layerRef.current;
   }, []);
 
+  const ensurePeekUnderlay = useCallback(() => {
+    if (!peekUnderlayRef.current) peekUnderlayRef.current = makeOffscreen();
+    return peekUnderlayRef.current;
+  }, []);
+
   const ensureScratch = useCallback(() => {
     if (!scratchRef.current) scratchRef.current = makeOffscreen();
     return scratchRef.current;
@@ -115,6 +122,37 @@ export function FoldCanvas({
     if (!strokeBaseRef.current) strokeBaseRef.current = makeOffscreen();
     return strokeBaseRef.current;
   }, []);
+
+  /**
+   * Map previous section's bottom peek strip into the TOP of the current layer.
+   * Same paper metrics (2:5 / fixed layer size) so reveal stitches without stretch.
+   * Underlay is display-only — commit stores user layer only.
+   */
+  const rebuildPeekUnderlay = useCallback(
+    (prevImg: HTMLImageElement | HTMLCanvasElement | null, peekRatio: number) => {
+      const underlay = ensurePeekUnderlay();
+      const ctx = underlay.getContext('2d')!;
+      ctx.clearRect(0, 0, LAYER_W, LAYER_H);
+      if (!prevImg) return;
+      const ratio = Math.min(0.25, Math.max(0.04, peekRatio));
+      const srcH = prevImg.height || LAYER_H;
+      const srcW = prevImg.width || LAYER_W;
+      const srcY0 = srcH * (1 - ratio);
+      const dstH = LAYER_H * ratio;
+      ctx.drawImage(
+        prevImg,
+        0,
+        srcY0,
+        srcW,
+        srcH - srcY0,
+        0,
+        0,
+        LAYER_W,
+        dstH,
+      );
+    },
+    [ensurePeekUnderlay],
+  );
 
   const loadLayerFromUrl = useCallback(
     async (url: string | null) => {
@@ -141,30 +179,52 @@ export function FoldCanvas({
     let cancelled = false;
     (async () => {
       await loadLayerFromUrl(game.sectionLayers[game.currentSection] ?? null);
-      if (!cancelled) paint();
+      if (!cancelled) {
+        const prev =
+          game.currentSection > 0
+            ? layerImgs.current[game.currentSection - 1]
+            : null;
+        rebuildPeekUnderlay(prev, game.peekRatio);
+        paint();
+      }
     })();
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game.currentSection, game.phase, game.sectionLayers[game.currentSection]]);
+  }, [game.currentSection, game.phase, game.sectionLayers[game.currentSection], game.peekRatio]);
 
-  // Prefetch all section images for peek / reveal
+  // Prefetch all section images for peek underlay / reveal
   useEffect(() => {
     game.sectionLayers.forEach((url, i) => {
       if (!url) {
         layerImgs.current[i] = null;
+        if (
+          game.phase === 'drawing' &&
+          game.currentSection > 0 &&
+          i === game.currentSection - 1
+        ) {
+          rebuildPeekUnderlay(null, game.peekRatio);
+          paint();
+        }
         return;
       }
       const img = new Image();
       img.onload = () => {
         layerImgs.current[i] = img;
+        if (
+          game.phase === 'drawing' &&
+          game.currentSection > 0 &&
+          i === game.currentSection - 1
+        ) {
+          rebuildPeekUnderlay(img, game.peekRatio);
+        }
         paint();
       };
       img.src = url;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game.sectionLayers, game.phase]);
+  }, [game.sectionLayers, game.phase, game.currentSection, game.peekRatio]);
 
   const paperToLayer = (p: FoldPoint, section: FoldSectionIndex) => {
     const { y0, y1 } = activeSectionBounds(section);
@@ -273,50 +333,33 @@ export function FoldCanvas({
       ctx.drawImage(img, 0, sy0, LAYER_W, sy1 - sy0, 0, dy0, w, dy1 - dy0);
     };
 
-    // Peek: bottom of previous layer + physical crease at fold boundary
-    if (peek && section > 0) {
-      const prevImg = layerImgs.current[section - 1];
-      const peekTop = ((peek.y0 - band.y0) / span) * h;
-      const peekBot = ((peek.y1 - band.y0) / span) * h;
-      ctx.fillStyle = 'rgba(110,28,28,0.06)';
-      ctx.fillRect(0, peekTop, w, peekBot - peekTop);
-      if (prevImg) {
-        const prev = activeSectionBounds((section - 1) as FoldSectionIndex);
-        const srcY0 = (peek.y0 - prev.y0) / (prev.y1 - prev.y0);
-        drawLayerBand(prevImg, peek.y0, peek.y1, srcY0, 1);
-      }
+    // Peek underlay first (non-erasable): previous bottom → current top band.
+    // Eraser only hits layerRef; commit never bakes this underlay into the section.
+    const underlay = peekUnderlayRef.current;
+    if (peek && section > 0 && underlay) {
+      const ratio = Math.min(0.25, Math.max(0.04, game.peekRatio));
+      const peekBotPaper = active.y0 + (active.y1 - active.y0) * ratio;
+      const peekTopPx = ((active.y0 - band.y0) / span) * h;
+      const peekBotPx = ((peekBotPaper - band.y0) / span) * h;
+      ctx.fillStyle = 'rgba(110,28,28,0.05)';
+      ctx.fillRect(0, peekTopPx, w, peekBotPx - peekTopPx);
+      drawLayerBand(underlay, active.y0, active.y1, 0, 1);
 
-      // Fold shadow above the crease (folded paper sitting on the peek)
-      const creaseShade = ctx.createLinearGradient(0, peekBot - 22, 0, peekBot + 16);
-      creaseShade.addColorStop(0, 'rgba(42,28,16,0)');
-      creaseShade.addColorStop(0.55, 'rgba(42,28,16,0.14)');
-      creaseShade.addColorStop(0.72, 'rgba(42,28,16,0.22)');
-      creaseShade.addColorStop(0.82, 'rgba(90,60,30,0.08)');
-      creaseShade.addColorStop(1, 'rgba(42,28,16,0)');
-      ctx.fillStyle = creaseShade;
-      ctx.fillRect(0, peekBot - 22, w, 38);
-
-      ctx.strokeStyle = 'rgba(90,60,30,0.55)';
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([]);
-      ctx.beginPath();
-      ctx.moveTo(0, peekBot);
-      ctx.lineTo(w, peekBot);
-      ctx.stroke();
-      // Hairline highlight just below crease
-      ctx.strokeStyle = 'rgba(255,248,230,0.35)';
+      ctx.strokeStyle = 'rgba(90,60,30,0.35)';
       ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
       ctx.beginPath();
-      ctx.moveTo(0, peekBot + 1.5);
-      ctx.lineTo(w, peekBot + 1.5);
+      ctx.moveTo(0, peekBotPx);
+      ctx.lineTo(w, peekBotPx);
       ctx.stroke();
+      ctx.setLineDash([]);
 
       ctx.fillStyle = 'rgba(42,28,16,0.45)';
       ctx.font = `600 ${Math.round(13 * (w / 400))}px "Source Sans 3", sans-serif`;
-      ctx.fillText('← önceki katın ucu', 12, peekTop + 18);
+      ctx.fillText('← önceki katın ucu (silinmez)', 12, peekTopPx + 18);
     }
 
-    // Live working layer (includes in-progress pen/eraser)
+    // Live working layer above underlay (pen + destination-out eraser)
     const live = layerRef.current;
     drawLayerBand(live, active.y0, active.y1, 0, 1);
 
@@ -504,6 +547,7 @@ export function FoldCanvas({
   };
 
   const commit = () => {
+    // User strokes only — peek underlay stays display-side so reveal does not double-draw.
     const layer = layerRef.current;
     if (!layer) return;
     onCommitRef.current(layer.toDataURL('image/png'));
