@@ -26,6 +26,8 @@ export interface Room {
   mapSize: MapSize;
   game: GameState | null;
   orderRollIndex: number;
+  /** Host, game_over sonrası yeniden-oyna ayarlarını düzenliyor */
+  rematchConfiguring: boolean;
 }
 
 function cloneState(state: GameState): GameState {
@@ -46,6 +48,7 @@ export function createRoomState(
     mapSize,
     game: null,
     orderRollIndex: 0,
+    rematchConfiguring: false,
   };
 }
 
@@ -62,6 +65,7 @@ export function roomToSession(room: Room, memberId: string) {
     })),
     maxPlayers: room.maxPlayers,
     mapSize: room.mapSize,
+    rematchConfiguring: !!room.rematchConfiguring,
   };
 }
 
@@ -81,6 +85,7 @@ export function startGame(room: Room): GameState {
   });
   room.game = game;
   room.orderRollIndex = 0;
+  room.rematchConfiguring = false;
   return game;
 }
 
@@ -148,14 +153,49 @@ export function undoClaim(room: Room, memberId: string): { ok: boolean; error?: 
   return { ok: true };
 }
 
-/** Host, oyun bittikten sonra aynı odada yeni harita başlatır. */
-export function rematchGame(room: Room, memberId: string): { ok: boolean; error?: string } {
+/** Host, oyun bittikten sonra yeniden-oyna ayar panelini açar. */
+export function beginRematchConfig(room: Room, memberId: string): { ok: boolean; error?: string } {
+  if (room.hostId !== memberId) return { ok: false, error: 'Yalnızca host ayarlayabilir' };
+  if (!room.game || room.game.phase !== 'game_over') {
+    return { ok: false, error: 'Ayarlar yalnızca oyun bitince' };
+  }
+  room.rematchConfiguring = true;
+  return { ok: true };
+}
+
+/** Host ayar panelinden geri döner (henüz yeni oyun başlamaz). */
+export function cancelRematchConfig(room: Room, memberId: string): { ok: boolean; error?: string } {
+  if (room.hostId !== memberId) return { ok: false, error: 'Yalnızca host iptal edebilir' };
+  room.rematchConfiguring = false;
+  return { ok: true };
+}
+
+export interface RematchOptions {
+  mapSize?: MapSize;
+  maxPlayers?: number | 'unlimited';
+}
+
+/** Host, oyun bittikten sonra aynı odada yeni harita başlatır (isteğe bağlı ayar güncellemesi). */
+export function rematchGame(
+  room: Room,
+  memberId: string,
+  opts?: RematchOptions,
+): { ok: boolean; error?: string } {
   if (room.hostId !== memberId) return { ok: false, error: 'Yalnızca host yeniden başlatabilir' };
   if (!room.game || room.game.phase !== 'game_over') {
     return { ok: false, error: 'Yeniden oyna yalnızca oyun bitince' };
   }
   if (room.members.filter((m) => m.connected).length < 2) {
     return { ok: false, error: 'En az 2 bağlı oyuncu gerekli' };
+  }
+
+  if (opts?.mapSize) room.mapSize = opts.mapSize;
+  if (opts?.maxPlayers !== undefined) {
+    const seated = room.members.length;
+    if (opts.maxPlayers !== 'unlimited' && opts.maxPlayers < seated) {
+      return { ok: false, error: `Kapasite en az ${seated} olmalı` };
+    }
+    room.maxPlayers = opts.maxPlayers;
   }
 
   startGame(room);
@@ -166,12 +206,14 @@ export function rematchGame(room: Room, memberId: string): { ok: boolean; error?
 export function transferHostIfNeeded(room: {
   hostId: string;
   members: RoomMember[];
+  rematchConfiguring?: boolean;
 }): boolean {
   const host = room.members.find((m) => m.id === room.hostId);
   if (host?.connected) return false;
   const nextHost = room.members.find((m) => m.connected);
   if (!nextHost) return false;
   room.hostId = nextHost.id;
+  if ('rematchConfiguring' in room) room.rematchConfiguring = false;
   return true;
 }
 

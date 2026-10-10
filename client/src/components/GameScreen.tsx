@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { GameState } from '@rfgames/shared';
 import { BOT_DIFFICULTY_LABELS, chooseBotClaim } from '@rfgames/shared';
 import { GameCanvas } from './GameCanvas';
@@ -13,10 +13,14 @@ interface Props {
   canInteract: boolean;
   myLabel?: string;
   canUndo?: boolean;
-  /** Yeniden oyna — yerel veya online host */
+  /** Yeniden oyna — yerel veya online host (ayarları açar) */
   onPlayAgain?: () => void;
   /** Online: host değilse yeniden oyna bekleniyor */
   rematchWaiting?: boolean;
+  /** Online misafir: host ayar panelinde */
+  rematchHostConfiguring?: boolean;
+  /** Host ayar paneli (Yeniden oyna sonrası) */
+  rematchSettings?: ReactNode;
   onRollOrder: () => number | null | void;
   onRollDice: () => number | null | void;
   onClaim: (r: number, c: number) => void;
@@ -43,6 +47,8 @@ export function GameScreen({
   canUndo = false,
   onPlayAgain,
   rematchWaiting = false,
+  rematchHostConfiguring = false,
+  rematchSettings,
   onRollOrder,
   onRollDice,
   onClaim,
@@ -374,34 +380,42 @@ export function GameScreen({
 
       {game.phase === 'game_over' && game.winnerIds && (
         <div className="game-end-overlay">
-          <div className="parchment-panel game-end-panel">
-            <h3 className="hand-title text-4xl mb-1">Sefer bitti</h3>
-            <div className="ornament-line my-2 max-w-[7rem] mx-auto" />
-            <p className="hand-note text-lg mb-4">
-              {game.winnerIds.length > 1
-                ? 'Beraberlik — topraklar paylaşıldı!'
-                : `${game.players.find((p) => p.id === game.winnerIds![0])?.name} zafer kazandı!`}
-            </p>
-            <div className="text-left mb-2">
-              <PlayerScoreboard
-                players={game.players}
-                totalLand={game.totalLandTiles}
-                currentPlayerId={-1}
-              />
-            </div>
-            <div className="game-end-actions">
-              {onPlayAgain && (
-                <button type="button" onClick={onPlayAgain} className="btn-primary">
-                  Yeniden oyna
-                </button>
-              )}
-              {rematchWaiting && !onPlayAgain && (
-                <p className="hand-note text-base mb-0">Host yeniden başlatacak…</p>
-              )}
-              <button type="button" onClick={onLeave} className="btn-ghost">
-                Ana menüye dön
-              </button>
-            </div>
+          <div className={`parchment-panel game-end-panel ${rematchSettings ? 'game-end-panel--settings' : ''}`}>
+            {rematchSettings ? (
+              rematchSettings
+            ) : (
+              <>
+                <h3 className="hand-title text-4xl mb-1">Sefer bitti</h3>
+                <div className="ornament-line my-2 max-w-[7rem] mx-auto" />
+                <p className="hand-note text-lg mb-4">
+                  {game.winnerIds.length > 1
+                    ? 'Beraberlik — topraklar paylaşıldı!'
+                    : `${game.players.find((p) => p.id === game.winnerIds![0])?.name} zafer kazandı!`}
+                </p>
+                <div className="text-left mb-2">
+                  <PlayerScoreboard
+                    players={game.players}
+                    totalLand={game.totalLandTiles}
+                    currentPlayerId={-1}
+                  />
+                </div>
+                <div className="game-end-actions">
+                  {onPlayAgain && (
+                    <button type="button" onClick={onPlayAgain} className="btn-primary">
+                      Yeniden oyna
+                    </button>
+                  )}
+                  {rematchWaiting && !onPlayAgain && (
+                    <p className="hand-note text-base mb-0">
+                      {rematchHostConfiguring ? 'Host ayarlıyor…' : 'Host yeniden başlatacak…'}
+                    </p>
+                  )}
+                  <button type="button" onClick={onLeave} className="btn-ghost">
+                    Ana menüye dön
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

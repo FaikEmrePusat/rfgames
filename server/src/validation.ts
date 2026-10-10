@@ -49,6 +49,28 @@ export function parseCreateRoom(raw: unknown): {
   return { playerName, mapSize, maxPlayers };
 }
 
+/** Yeniden oyna — boş/eksik alanlar mevcut oda ayarında kalır. */
+export function parseRematchOptions(raw: unknown): {
+  mapSize?: MapSize;
+  maxPlayers?: number | 'unlimited';
+} | null {
+  if (raw == null) return {};
+  if (typeof raw !== 'object') return null;
+  const o = raw as Record<string, unknown>;
+  const opts: { mapSize?: MapSize; maxPlayers?: number | 'unlimited' } = {};
+  if ('mapSize' in o) {
+    const mapSize = parseMapSize(o.mapSize);
+    if (!mapSize) return null;
+    opts.mapSize = mapSize;
+  }
+  if ('maxPlayers' in o) {
+    const maxPlayers = parseMaxPlayers(o.maxPlayers);
+    if (maxPlayers === null) return null;
+    opts.maxPlayers = maxPlayers;
+  }
+  return opts;
+}
+
 export function parseJoinRoom(raw: unknown): { code: string; name: string } | null {
   if (!raw || typeof raw !== 'object') return null;
   const o = raw as Record<string, unknown>;

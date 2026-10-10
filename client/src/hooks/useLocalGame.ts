@@ -18,8 +18,8 @@ export function useLocalGame() {
   const [game, setGame] = useState<GameState | null>(null);
   const [orderRollIdx, setOrderRollIdx] = useState(0);
   const [toast, setToast] = useState<string | null>(null);
+  const [lastConfig, setLastConfig] = useState<GameConfig | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const lastConfigRef = useRef<GameConfig | null>(null);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -31,17 +31,16 @@ export function useLocalGame() {
   }, []);
 
   const startGame = useCallback((config: GameConfig) => {
-    lastConfigRef.current = config;
+    setLastConfig(config);
     const initial = createInitialGame(config);
     setGame(initial);
     setOrderRollIdx(0);
   }, []);
 
   const playAgain = useCallback(() => {
-    const config = lastConfigRef.current;
-    if (!config) return;
-    startGame(config);
-  }, [startGame]);
+    if (!lastConfig) return;
+    startGame(lastConfig);
+  }, [lastConfig, startGame]);
 
   const rollOrderDice = useCallback((): number | null => {
     if (!game || game.phase !== 'roll_order') return null;
@@ -100,7 +99,7 @@ export function useLocalGame() {
     setGame(null);
     setOrderRollIdx(0);
     setToast(null);
-    lastConfigRef.current = null;
+    setLastConfig(null);
   }, []);
 
   const canUndo = !!game && canUndoTurn(game, game.currentPlayerIdx);
@@ -109,6 +108,7 @@ export function useLocalGame() {
     game,
     orderRollIdx,
     toast,
+    lastConfig,
     startGame,
     playAgain,
     rollOrderDice,

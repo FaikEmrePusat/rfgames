@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HubScreen } from './components/HubScreen';
 import { LobbyScreen } from './components/LobbyScreen';
 import { GameScreen } from './components/GameScreen';
+import { RematchSettingsPanel } from './components/RematchSettingsPanel';
 import { FoldLobby } from './components/foldDraw/FoldLobby';
 import { FoldGameScreen } from './components/foldDraw/FoldGameScreen';
 import { useLocalGame } from './hooks/useLocalGame';
@@ -15,11 +16,21 @@ type AppMode = 'hub' | 'kapmaca' | 'fold';
 
 export default function App() {
   const [mode, setMode] = useState<AppMode>('hub');
+  const [localRematchOpen, setLocalRematchOpen] = useState(false);
+  const [onlineRematchOpen, setOnlineRematchOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const local = useLocalGame();
   const online = useOnlineGame();
   const fold = useLocalFoldDraw();
   const foldOnline = useOnlineFoldDraw();
+
+  useEffect(() => {
+    if (!local.game || local.game.phase !== 'game_over') setLocalRematchOpen(false);
+  }, [local.game]);
+
+  useEffect(() => {
+    if (!online.game || online.game.phase !== 'game_over') setOnlineRematchOpen(false);
+  }, [online.game]);
 
   const inLocalGame = local.game !== null;
   const inOnlineGame = online.game !== null;
@@ -45,6 +56,8 @@ export default function App() {
     if (inOnlineGame || inOnlineLobby) online.leave();
     if (inFoldLocalGame) fold.leave();
     if (inFoldOnlineGame || inFoldOnlineLobby) foldOnline.leave();
+    setLocalRematchOpen(false);
+    setOnlineRematchOpen(false);
     setMode('hub');
   };
 
@@ -213,8 +226,26 @@ export default function App() {
             onClaim={local.claimTile}
             onUndo={local.undoClaim}
             onEndTurn={local.endTurn}
-            onPlayAgain={local.playAgain}
-            onLeave={local.leaveGame}
+            onPlayAgain={
+              local.lastConfig ? () => setLocalRematchOpen(true) : undefined
+            }
+            rematchSettings={
+              localRematchOpen && local.lastConfig ? (
+                <RematchSettingsPanel
+                  mode="local"
+                  initial={local.lastConfig}
+                  onConfirm={(config) => {
+                    local.startGame(config);
+                    setLocalRematchOpen(false);
+                  }}
+                  onCancel={() => setLocalRematchOpen(false)}
+                />
+              ) : undefined
+            }
+            onLeave={() => {
+              setLocalRematchOpen(false);
+              local.leaveGame();
+            }}
           />
         )}
 
@@ -231,9 +262,40 @@ export default function App() {
             onClaim={online.claimTile}
             onUndo={online.undoClaim}
             onEndTurn={online.endTurn}
-            onPlayAgain={online.session.isHost ? online.rematch : undefined}
+            onPlayAgain={
+              online.session.isHost
+                ? () => {
+                    setOnlineRematchOpen(true);
+                    online.beginRematchConfig();
+                  }
+                : undefined
+            }
             rematchWaiting={!online.session.isHost}
-            onLeave={online.leave}
+            rematchHostConfiguring={!!online.session.rematchConfiguring}
+            rematchSettings={
+              onlineRematchOpen && online.session.isHost ? (
+                <RematchSettingsPanel
+                  mode="online"
+                  initial={{
+                    mapSize: online.session.mapSize,
+                    maxPlayers: online.session.maxPlayers,
+                  }}
+                  memberCount={online.session.members.length}
+                  onConfirm={(opts) => {
+                    online.rematch(opts);
+                    setOnlineRematchOpen(false);
+                  }}
+                  onCancel={() => {
+                    setOnlineRematchOpen(false);
+                    online.cancelRematchConfig();
+                  }}
+                />
+              ) : undefined
+            }
+            onLeave={() => {
+              setOnlineRematchOpen(false);
+              online.leave();
+            }}
           />
         )}
 

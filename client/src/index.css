@@ -220,6 +220,22 @@ body {
   transform: none;
 }
 
+.game-end-panel--settings {
+  max-height: min(92dvh, 40rem);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  text-align: center;
+}
+
+.rematch-settings .lobby-field {
+  margin-bottom: var(--space-3);
+}
+
+.rematch-settings .lobby-field--seats {
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
 .game-end-actions {
   display: flex;
   flex-direction: column;

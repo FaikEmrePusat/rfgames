@@ -7,6 +7,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import {
+  beginRematchConfig,
+  cancelRematchConfig,
   claimTile,
   createRoomState,
   endTurn,
@@ -40,6 +42,7 @@ import {
   parseFoldSubmitSection,
   parseJoinRoom,
   parseRejoin,
+  parseRematchOptions,
 } from './validation.js';
 
 const PORT = Number(process.env.PORT) || 3001;
@@ -499,13 +502,47 @@ io.on('connection', (socket) => {
     else broadcastGame(room);
   });
 
-  socket.on('game:rematch', () => {
+  socket.on('game:rematchPrepare', () => {
     const ref = socketToRoom.get(socket.id);
     if (!ref) return;
     const room = findRoom(ref.code);
     if (!room) return;
 
-    const result = rematchGame(room, ref.memberId);
+    const result = beginRematchConfig(room, ref.memberId);
+    if (!result.ok) {
+      socket.emit('error', result.error);
+      return;
+    }
+    broadcastRoom(room);
+  });
+
+  socket.on('game:rematchCancel', () => {
+    const ref = socketToRoom.get(socket.id);
+    if (!ref) return;
+    const room = findRoom(ref.code);
+    if (!room) return;
+
+    const result = cancelRematchConfig(room, ref.memberId);
+    if (!result.ok) {
+      socket.emit('error', result.error);
+      return;
+    }
+    broadcastRoom(room);
+  });
+
+  socket.on('game:rematch', (raw?: unknown) => {
+    const ref = socketToRoom.get(socket.id);
+    if (!ref) return;
+    const room = findRoom(ref.code);
+    if (!room) return;
+
+    const opts = parseRematchOptions(raw ?? {});
+    if (opts === null) {
+      socket.emit('error', 'Geçersiz yeniden oyna ayarları');
+      return;
+    }
+
+    const result = rematchGame(room, ref.memberId, opts);
     if (!result.ok) {
       socket.emit('error', result.error);
       return;

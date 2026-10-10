@@ -18,6 +18,13 @@ export interface OnlineSession {
   members: { name: string; id: string; connected?: boolean }[];
   maxPlayers: number | 'unlimited';
   mapSize: MapSize;
+  /** Host yeniden-oyna ayar panelinde */
+  rematchConfiguring?: boolean;
+}
+
+export interface OnlineRematchPayload {
+  mapSize: MapSize;
+  maxPlayers: number | 'unlimited';
 }
 
 function loadSavedSession(): { roomCode: string; memberId: string } | null {
@@ -184,8 +191,16 @@ export function useOnlineGame() {
     socketRef.current?.emit('game:undo');
   }, []);
 
-  const rematch = useCallback(() => {
-    socketRef.current?.emit('game:rematch');
+  const beginRematchConfig = useCallback(() => {
+    socketRef.current?.emit('game:rematchPrepare');
+  }, []);
+
+  const cancelRematchConfig = useCallback(() => {
+    socketRef.current?.emit('game:rematchCancel');
+  }, []);
+
+  const rematch = useCallback((opts?: OnlineRematchPayload) => {
+    socketRef.current?.emit('game:rematch', opts ?? {});
   }, []);
 
   const leave = useCallback(() => {
@@ -226,6 +241,8 @@ export function useOnlineGame() {
     claimTile,
     undoClaim,
     endTurn,
+    beginRematchConfig,
+    cancelRematchConfig,
     rematch,
     leave,
     canInteract: !!canInteract,
