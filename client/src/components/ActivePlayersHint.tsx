@@ -6,7 +6,11 @@ export function ActivePlayersHint() {
   if (count === null) return null;
 
   return (
-    <span className="active-players-hint" title="Bağlı oyuncu sayısı" aria-live="polite">
+    <span
+      className="active-players-hint"
+      title="Açık sekme / bağlı oyuncu sayısı"
+      aria-live="polite"
+    >
       aktif · {count}
     </span>
   );

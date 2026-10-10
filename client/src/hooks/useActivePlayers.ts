@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
-
-/** Same origin resolution as online hooks — keep CORS/deploy paths aligned. */
-const SERVER_URL =
-  import.meta.env.VITE_SERVER_URL ??
-  (import.meta.env.PROD ? window.location.origin : 'http://localhost:3001');
+import { SERVER_URL } from '../lib/serverUrl';
+import { getSharedSocket } from '../lib/sharedSocket';
 
 const POLL_MS = 25_000;
 
 /**
  * Polls GET /health for `activePlayers` (connected Socket.io clients).
+ * Also refreshes when the shared presence socket connects/disconnects.
  * Fails silently when offline — returns null so the UI can hide.
  */
 export function useActivePlayers(): number | null {
@@ -44,16 +42,23 @@ export function useActivePlayers(): number | null {
       if (document.visibilityState === 'visible') void fetchCount();
     };
 
+    const socket = getSharedSocket();
+    const onSocketChange = () => void fetchCount();
+
     void fetchCount();
     const id = window.setInterval(fetchCount, POLL_MS);
     window.addEventListener('focus', fetchCount);
     document.addEventListener('visibilitychange', onVisible);
+    socket.on('connect', onSocketChange);
+    socket.on('disconnect', onSocketChange);
 
     return () => {
       cancelled = true;
       window.clearInterval(id);
       window.removeEventListener('focus', fetchCount);
       document.removeEventListener('visibilitychange', onVisible);
+      socket.off('connect', onSocketChange);
+      socket.off('disconnect', onSocketChange);
     };
   }, []);
 

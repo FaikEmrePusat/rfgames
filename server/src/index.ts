@@ -79,9 +79,9 @@ app.use(
   }),
 );
 /**
- * aktifPlayers = currently connected Socket.io clients (open websocket/polling
- * sessions), not unique in-room members. Hub visitors without an online socket
- * are not counted. Updated after `io` is created below.
+ * aktifPlayers = connected Socket.io clients (default namespace). The client
+ * opens one shared presence socket for every App session (hub, local, online),
+ * so open tabs count; not unique logged-in users. Wired after `io` is created.
  */
 let activePlayerCount = (): number => 0;
 

@@ -1,13 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import type { GameState, MapSize } from '@rfgames/shared';
 import { canUndoTurn, playerIdForMember } from '@rfgames/shared';
 import type { OnlineLobbyOptions } from '../components/LobbyScreen';
+import { getSharedSocket } from '../lib/sharedSocket';
 
-/** Dev: localhost API. Prod (unset VITE_SERVER_URL): same origin for single-service deploy. */
-const SERVER_URL =
-  import.meta.env.VITE_SERVER_URL ??
-  (import.meta.env.PROD ? window.location.origin : 'http://localhost:3001');
 const SESSION_KEY = 'rfgames.onlineSession';
 
 export interface OnlineSession {
@@ -92,48 +89,52 @@ export function useOnlineGame() {
     [showToast],
   );
 
-  const ensureSocket = useCallback((): Socket => {
-    if (socketRef.current?.connected || socketRef.current) {
-      return socketRef.current;
-    }
+  const tryRejoin = useCallback((s: Socket) => {
+    const saved = loadSavedSession();
+    if (!saved) return;
+    s.emit(
+      'room:rejoin',
+      saved,
+      (res: { ok: boolean; session?: OnlineSession; error?: string }) => {
+        if (res.ok && res.session) {
+          setSession(res.session);
+          saveSession(res.session);
+        } else {
+          saveSession(null);
+        }
+      },
+    );
+  }, []);
 
-    const s = io(SERVER_URL, {
-      transports: ['websocket', 'polling'],
-      autoConnect: true,
-    });
+  const boundSocketRef = useRef<Socket | null>(null);
+
+  const ensureSocket = useCallback((): Socket => {
+    const s = getSharedSocket();
     socketRef.current = s;
     setSocket(s);
-    bindSocketHandlers(s);
 
-    s.on('connect', () => {
-      const saved = loadSavedSession();
-      if (!saved) return;
-      s.emit(
-        'room:rejoin',
-        saved,
-        (res: { ok: boolean; session?: OnlineSession; error?: string }) => {
-          if (res.ok && res.session) {
-            setSession(res.session);
-            saveSession(res.session);
-          } else {
-            saveSession(null);
-          }
-        },
-      );
-    });
+    if (boundSocketRef.current !== s) {
+      bindSocketHandlers(s);
+      s.on('connect', () => tryRejoin(s));
+      boundSocketRef.current = s;
+    }
 
     return s;
-  }, [bindSocketHandlers]);
+  }, [bindSocketHandlers, tryRejoin]);
 
   useEffect(() => {
-    // Yalnızca kayıtlı online oturum varsa bağlan (yerel oyunda soket yok).
-    if (loadSavedSession()) ensureSocket();
+    // Shared presence socket stays up; only attach room handlers / rejoin when needed.
+    if (!loadSavedSession()) {
+      return () => {
+        if (toastTimer.current) clearTimeout(toastTimer.current);
+      };
+    }
+    const s = ensureSocket();
+    if (s.connected) tryRejoin(s);
     return () => {
       if (toastTimer.current) clearTimeout(toastTimer.current);
-      socketRef.current?.disconnect();
-      socketRef.current = null;
     };
-  }, [ensureSocket]);
+  }, [ensureSocket, tryRejoin]);
 
   const createRoom = useCallback(
     (opts: OnlineLobbyOptions) => {

@@ -1,12 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import type { FoldGameState } from '@rfgames/shared';
 import { isCurrentFoldArtist, setSectionLayer } from '@rfgames/shared';
 import { buildPeekSafeLayer } from '../components/foldDraw/peekSafeLayer';
-
-const SERVER_URL =
-  import.meta.env.VITE_SERVER_URL ??
-  (import.meta.env.PROD ? window.location.origin : 'http://localhost:3001');
+import { getSharedSocket } from '../lib/sharedSocket';
 
 const SESSION_KEY = 'rfgames.foldOnlineSession';
 
@@ -96,44 +93,44 @@ export function useOnlineFoldDraw() {
     });
   }, []);
 
-  const ensureSocket = useCallback((): Socket => {
-    if (socketRef.current) return socketRef.current;
+  const tryRejoin = useCallback((s: Socket) => {
+    const saved = loadSavedSession();
+    if (!saved) return;
+    s.emit(
+      'fold:rejoin',
+      saved,
+      (res: { ok: boolean; session?: FoldOnlineSession; error?: string }) => {
+        if (res.ok && res.session) {
+          setSession(res.session);
+          saveSession(res.session);
+        } else {
+          saveSession(null);
+        }
+      },
+    );
+  }, []);
 
-    const s = io(SERVER_URL, {
-      transports: ['websocket', 'polling'],
-      autoConnect: true,
-    });
+  const boundSocketRef = useRef<Socket | null>(null);
+
+  const ensureSocket = useCallback((): Socket => {
+    const s = getSharedSocket();
     socketRef.current = s;
     setSocket(s);
-    bindSocketHandlers(s);
 
-    s.on('connect', () => {
-      const saved = loadSavedSession();
-      if (!saved) return;
-      s.emit(
-        'fold:rejoin',
-        saved,
-        (res: { ok: boolean; session?: FoldOnlineSession; error?: string }) => {
-          if (res.ok && res.session) {
-            setSession(res.session);
-            saveSession(res.session);
-          } else {
-            saveSession(null);
-          }
-        },
-      );
-    });
+    if (boundSocketRef.current !== s) {
+      bindSocketHandlers(s);
+      s.on('connect', () => tryRejoin(s));
+      boundSocketRef.current = s;
+    }
 
     return s;
-  }, [bindSocketHandlers]);
+  }, [bindSocketHandlers, tryRejoin]);
 
   useEffect(() => {
-    if (loadSavedSession()) ensureSocket();
-    return () => {
-      socketRef.current?.disconnect();
-      socketRef.current = null;
-    };
-  }, [ensureSocket]);
+    if (!loadSavedSession()) return;
+    const s = ensureSocket();
+    if (s.connected) tryRejoin(s);
+  }, [ensureSocket, tryRejoin]);
 
   const createRoom = useCallback(
     (opts: FoldOnlineCreateOpts) => {

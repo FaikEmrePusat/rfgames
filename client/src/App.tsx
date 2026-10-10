@@ -10,6 +10,7 @@ import { useOnlineGame } from './hooks/useOnlineGame';
 import { useLocalFoldDraw } from './hooks/useLocalFoldDraw';
 import { useOnlineFoldDraw } from './hooks/useOnlineFoldDraw';
 import { ActivePlayersHint } from './components/ActivePlayersHint';
+import { useAppPresence } from './hooks/useAppPresence';
 import { ThemePicker } from './theme/ThemePicker';
 import { useTheme } from './theme/useTheme';
 
@@ -20,6 +21,7 @@ export default function App() {
   const [localRematchOpen, setLocalRematchOpen] = useState(false);
   const [onlineRematchOpen, setOnlineRematchOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  useAppPresence();
   const local = useLocalGame();
   const online = useOnlineGame();
   const fold = useLocalFoldDraw();
