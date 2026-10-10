@@ -9,7 +9,29 @@ export const FOLD_SECTION_LABELS: Record<FoldSectionIndex, string> = {
   3: 'Ayak',
 };
 
-/** Normalized paper coords 0–1 (top-left origin). */
+/**
+ * Canonical vertical character paper (width:height = 2:5).
+ * Four equal section bands stack on this sheet; draw zoom and reveal share these metrics
+ * so strokes never squash/stretch between phases.
+ */
+export const FOLD_PAPER_ASPECT_W = 2;
+export const FOLD_PAPER_ASPECT_H = 5;
+/** Full unfolded paper height / width (= 2.5). */
+export const FOLD_PAPER_HEIGHT_OVER_WIDTH = FOLD_PAPER_ASPECT_H / FOLD_PAPER_ASPECT_W;
+
+/**
+ * Raster size for one section layer PNG (full paper width x one band height).
+ * Chosen so paper height is exact: 800x2000 -> four 800x500 bands.
+ */
+export const FOLD_LAYER_WIDTH_PX = 800;
+export const FOLD_PAPER_HEIGHT_PX =
+  (FOLD_LAYER_WIDTH_PX * FOLD_PAPER_ASPECT_H) / FOLD_PAPER_ASPECT_W;
+export const FOLD_LAYER_HEIGHT_PX = FOLD_PAPER_HEIGHT_PX / FOLD_SECTION_COUNT;
+/** Section band height / width on the paper (= 0.625 = 5/8). */
+export const FOLD_SECTION_HEIGHT_OVER_WIDTH =
+  FOLD_PAPER_HEIGHT_OVER_WIDTH / FOLD_SECTION_COUNT;
+
+/** Normalized paper coords 0-1 (top-left origin). */
 export interface FoldPoint {
   x: number;
   y: number;
@@ -36,7 +58,7 @@ export interface FoldGameState {
    * Raster ink per section (PNG data URL). Eraser uses pixel-perfect destination-out.
    */
   sectionLayers: (string | null)[];
-  /** Bottom fraction of previous section shown as peek (0–1 of section height) */
+  /** Bottom fraction of previous section shown as peek (0-1 of section height) */
   peekRatio: number;
 }
 

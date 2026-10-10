@@ -1,4 +1,5 @@
 import {
+  FOLD_PAPER_HEIGHT_OVER_WIDTH,
   FOLD_PLAYER_COLORS,
   FOLD_SECTION_COUNT,
   type FoldGameConfig,
@@ -58,6 +59,25 @@ export function peekBounds(
   const h = y1 - y0;
   const ratio = Math.min(0.25, Math.max(0.04, peekRatio));
   return { y0: y1 - h * ratio, y1 };
+}
+
+/** Visible paper Y band while drawing: peek strip (if any) + active section. */
+export function drawingViewBand(
+  section: FoldSectionIndex,
+  peekRatio: number,
+): { y0: number; y1: number } {
+  const active = activeSectionBounds(section);
+  const peek = peekBounds(section, peekRatio);
+  return { y0: peek ? peek.y0 : active.y0, y1: active.y1 };
+}
+
+/**
+ * Canvas/CSS height÷width for a paper-space Y band on the canonical 2:5 sheet.
+ * Draw zoom must use this so the viewport matches the band's true rectangle on reveal.
+ */
+export function foldBandHeightOverWidth(band: { y0: number; y1: number }): number {
+  const span = band.y1 - band.y0 || 1;
+  return FOLD_PAPER_HEIGHT_OVER_WIDTH * span;
 }
 
 export function currentArtist(state: FoldGameState): FoldPlayer {

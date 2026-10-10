@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useRef } from 'react';
 import type { FoldGameState, FoldPoint, FoldSectionIndex } from '@rfgames/shared';
 import {
+  FOLD_LAYER_HEIGHT_PX,
+  FOLD_LAYER_WIDTH_PX,
+  FOLD_PAPER_HEIGHT_OVER_WIDTH,
   FOLD_SECTION_COUNT,
   FOLD_SECTION_LABELS,
   activeSectionBounds,
   clampPointToSection,
+  drawingViewBand,
+  foldBandHeightOverWidth,
   peekBounds,
 } from '@rfgames/shared';
 import { useTheme } from '../../theme/useTheme';
@@ -32,14 +37,12 @@ interface Props {
 
 type ViewBand = { y0: number; y1: number };
 
-const LAYER_W = 900;
-const LAYER_H = Math.round(LAYER_W / FOLD_SECTION_COUNT); // square-ish band of full paper height share
+/** Section layer raster — same aspect as one band on the 2:5 paper. */
+const LAYER_W = FOLD_LAYER_WIDTH_PX;
+const LAYER_H = FOLD_LAYER_HEIGHT_PX;
 
-function drawingViewBand(game: FoldGameState): ViewBand {
-  const section = game.currentSection;
-  const active = activeSectionBounds(section);
-  const peek = peekBounds(section, game.peekRatio);
-  return { y0: peek ? peek.y0 : active.y0, y1: active.y1 };
+function viewBandForGame(game: FoldGameState): ViewBand {
+  return drawingViewBand(game.currentSection, game.peekRatio);
 }
 
 function brushPx(inkWidth: number) {
@@ -246,7 +249,7 @@ export function FoldCanvas({
     const section = game.currentSection;
     const active = activeSectionBounds(section);
     const peek = peekBounds(section, game.peekRatio);
-    const band = drawingViewBand(game);
+    const band = viewBandForGame(game);
     viewRef.current = band;
     const span = band.y1 - band.y0 || 1;
     fillPaper();
@@ -348,7 +351,11 @@ export function FoldCanvas({
       const rect = parent?.getBoundingClientRect();
       const availW = Math.max(160, rect?.width ?? 360);
       const availH = Math.max(160, rect?.height ?? 320);
-      const ratio = game.phase === 'reveal' ? 1.55 : 0.88;
+      // True paper-band aspect: reveal = full 2:5 sheet; draw = active band (+ peek).
+      const ratio =
+        game.phase === 'reveal'
+          ? FOLD_PAPER_HEIGHT_OVER_WIDTH
+          : foldBandHeightOverWidth(viewBandForGame(game));
       // Fit inside stage without forcing page scroll
       let cssW = availW;
       let cssH = cssW * ratio;
@@ -366,7 +373,7 @@ export function FoldCanvas({
     resize();
     window.addEventListener('resize', resize);
     return () => window.removeEventListener('resize', resize);
-  }, [paint, game.phase, game.currentSection]);
+  }, [paint, game.phase, game.currentSection, game.peekRatio]);
 
   useEffect(() => {
     paint();

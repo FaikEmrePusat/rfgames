@@ -1,5 +1,10 @@
 import type { FoldGameState } from '@rfgames/shared';
-import { FOLD_SECTION_COUNT } from '@rfgames/shared';
+import {
+  FOLD_LAYER_HEIGHT_PX,
+  FOLD_LAYER_WIDTH_PX,
+  FOLD_PAPER_HEIGHT_PX,
+  FOLD_SECTION_COUNT,
+} from '@rfgames/shared';
 
 function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -15,8 +20,8 @@ export async function downloadFoldPaperPng(
   game: FoldGameState,
   filename = 'katla-ciz.png',
 ) {
-  const w = 900;
-  const h = Math.round(w * 1.55);
+  const w = FOLD_LAYER_WIDTH_PX;
+  const h = FOLD_PAPER_HEIGHT_PX;
   const canvas = document.createElement('canvas');
   canvas.width = w;
   canvas.height = h;
@@ -37,9 +42,8 @@ export async function downloadFoldPaperPng(
     if (!url) continue;
     try {
       const img = await loadImage(url);
-      const y0 = (s / FOLD_SECTION_COUNT) * h;
-      const y1 = ((s + 1) / FOLD_SECTION_COUNT) * h;
-      ctx.drawImage(img, 0, y0, w, y1 - y0);
+      const y0 = s * FOLD_LAYER_HEIGHT_PX;
+      ctx.drawImage(img, 0, y0, w, FOLD_LAYER_HEIGHT_PX);
     } catch {
       /* skip broken layer */
     }
@@ -48,7 +52,7 @@ export async function downloadFoldPaperPng(
   ctx.strokeStyle = 'rgba(90,60,30,0.18)';
   ctx.setLineDash([8, 8]);
   for (let i = 1; i < FOLD_SECTION_COUNT; i++) {
-    const y = (i / FOLD_SECTION_COUNT) * h;
+    const y = i * FOLD_LAYER_HEIGHT_PX;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(w, y);
@@ -62,7 +66,7 @@ export async function downloadFoldPaperPng(
 
   ctx.fillStyle = 'rgba(42,28,16,0.45)';
   ctx.font = '600 22px "Source Sans 3", sans-serif';
-  ctx.fillText('Katla-Çiz · RF Games', 24, h - 20);
+  ctx.fillText('Katla-\u00c7iz \u00b7 RF Games', 24, h - 20);
 
   canvas.toBlob((blob) => {
     if (!blob) return;

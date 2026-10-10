@@ -1,11 +1,12 @@
-import { FOLD_SECTION_COUNT } from '@rfgames/shared';
-
-const LAYER_W = 900;
-const LAYER_H = Math.round(LAYER_W / FOLD_SECTION_COUNT);
+import {
+  FOLD_LAYER_HEIGHT_PX,
+  FOLD_LAYER_WIDTH_PX,
+} from '@rfgames/shared';
 
 /**
  * Builds a section-sized PNG where only the bottom `peekRatio` strip has ink.
  * Safe to send to the next artist: full previous art above the peek is blank.
+ * Uses the same layer pixel size as FoldCanvas so reveal stitches without stretch.
  */
 export function buildPeekSafeLayer(
   sectionDataUrl: string,
@@ -16,27 +17,27 @@ export function buildPeekSafeLayer(
     const img = new Image();
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = LAYER_W;
-      canvas.height = LAYER_H;
+      canvas.width = FOLD_LAYER_WIDTH_PX;
+      canvas.height = FOLD_LAYER_HEIGHT_PX;
       const ctx = canvas.getContext('2d');
       if (!ctx) {
         reject(new Error('canvas'));
         return;
       }
-      const srcH = img.height || LAYER_H;
+      const srcH = img.height || FOLD_LAYER_HEIGHT_PX;
       const srcY0 = srcH * (1 - ratio);
-      const dstY0 = LAYER_H * (1 - ratio);
-      ctx.clearRect(0, 0, LAYER_W, LAYER_H);
+      const dstY0 = FOLD_LAYER_HEIGHT_PX * (1 - ratio);
+      ctx.clearRect(0, 0, FOLD_LAYER_WIDTH_PX, FOLD_LAYER_HEIGHT_PX);
       ctx.drawImage(
         img,
         0,
         srcY0,
-        img.width || LAYER_W,
+        img.width || FOLD_LAYER_WIDTH_PX,
         srcH - srcY0,
         0,
         dstY0,
-        LAYER_W,
-        LAYER_H - dstY0,
+        FOLD_LAYER_WIDTH_PX,
+        FOLD_LAYER_HEIGHT_PX - dstY0,
       );
       resolve(canvas.toDataURL('image/png'));
     };

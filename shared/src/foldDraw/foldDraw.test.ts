@@ -3,11 +3,23 @@ import {
   assignSectionOwners,
   completeSection,
   createFoldGame,
+  drawingViewBand,
+  foldBandHeightOverWidth,
   peekBounds,
   sectionHasInk,
   sectionYRange,
   setSectionLayer,
 } from './logic.js';
+import {
+  FOLD_LAYER_HEIGHT_PX,
+  FOLD_LAYER_WIDTH_PX,
+  FOLD_PAPER_ASPECT_H,
+  FOLD_PAPER_ASPECT_W,
+  FOLD_PAPER_HEIGHT_OVER_WIDTH,
+  FOLD_PAPER_HEIGHT_PX,
+  FOLD_SECTION_COUNT,
+  FOLD_SECTION_HEIGHT_OVER_WIDTH,
+} from './types.js';
 import {
   createFoldGameOnline,
   filterFoldStateForMember,
@@ -102,5 +114,31 @@ describe('foldDraw online privacy', () => {
     expect(isValidFoldLayerDataUrl(tinyPng)).toBe(true);
     expect(isValidFoldLayerDataUrl('http://evil')).toBe(false);
     expect(isValidFoldLayerDataUrl('data:image/png;base64,short')).toBe(false);
+  });
+});
+
+describe('foldDraw paper metrics', () => {
+  it('uses canonical 2:5 paper with equal section bands', () => {
+    expect(FOLD_PAPER_ASPECT_W).toBe(2);
+    expect(FOLD_PAPER_ASPECT_H).toBe(5);
+    expect(FOLD_PAPER_HEIGHT_OVER_WIDTH).toBe(2.5);
+    expect(FOLD_SECTION_HEIGHT_OVER_WIDTH).toBe(0.625);
+    expect(FOLD_LAYER_WIDTH_PX).toBe(800);
+    expect(FOLD_LAYER_HEIGHT_PX).toBe(500);
+    expect(FOLD_PAPER_HEIGHT_PX).toBe(FOLD_LAYER_HEIGHT_PX * FOLD_SECTION_COUNT);
+  });
+
+  it('draw head viewport matches section band aspect (not square)', () => {
+    const band = drawingViewBand(0, 0.1);
+    expect(band.y0).toBe(0);
+    expect(band.y1).toBe(0.25);
+    expect(foldBandHeightOverWidth(band)).toBeCloseTo(0.625);
+  });
+
+  it('draw with peek keeps band aspect tied to paper metrics', () => {
+    const band = drawingViewBand(1, 0.1);
+    // peek 10% of previous section + full active section
+    expect(band.y1 - band.y0).toBeCloseTo(0.25 * 1.1);
+    expect(foldBandHeightOverWidth(band)).toBeCloseTo(2.5 * 0.25 * 1.1);
   });
 });

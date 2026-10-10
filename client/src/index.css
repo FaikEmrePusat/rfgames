@@ -1294,6 +1294,8 @@ body {
 }
 
 .fold-stage {
+  /* Paper metrics live in shared foldDraw (2:5 sheet); canvas sizes itself to band aspect. */
+  --fold-paper-aspect: 2 / 5;
   flex: 1;
   min-height: 0;
   display: flex;
