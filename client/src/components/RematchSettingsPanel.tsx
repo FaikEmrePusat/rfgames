@@ -115,7 +115,9 @@ export function RematchSettingsPanel(props: Props) {
 
   return (
     <div className="rematch-settings">
-      <h3 className="hand-title text-3xl mb-1">Yeni sefer ayarları</h3>
+      <h3 id="game-end-title" className="hand-title text-3xl mb-1">
+        Yeni sefer ayarları
+      </h3>
       <div className="ornament-line my-2 max-w-[7rem] mx-auto" />
       <p className="hand-note text-base mb-3">
         {props.mode === 'local'

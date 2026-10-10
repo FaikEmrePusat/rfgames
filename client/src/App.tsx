@@ -25,12 +25,12 @@ export default function App() {
   const foldOnline = useOnlineFoldDraw();
 
   useEffect(() => {
-    if (!local.game || local.game.phase !== 'game_over') setLocalRematchOpen(false);
-  }, [local.game]);
+    if (local.game?.phase !== 'game_over') setLocalRematchOpen(false);
+  }, [local.game?.phase]);
 
   useEffect(() => {
-    if (!online.game || online.game.phase !== 'game_over') setOnlineRematchOpen(false);
-  }, [online.game]);
+    if (online.game?.phase !== 'game_over') setOnlineRematchOpen(false);
+  }, [online.game?.phase]);
 
   const inLocalGame = local.game !== null;
   const inOnlineGame = online.game !== null;

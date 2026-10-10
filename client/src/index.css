@@ -202,7 +202,8 @@ body {
 .game-end-overlay {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  /* Portaled to body — above site-header (40) and Ortam menu (60) */
+  z-index: 70;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -210,21 +211,29 @@ body {
   padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
   background: rgba(20, 18, 16, 0.72);
   box-sizing: border-box;
+  /* Prevent tall rematch settings from spilling outside the scrim */
+  overflow: hidden;
 }
 
 .game-end-panel {
   width: 100%;
   max-width: 28rem;
+  max-height: calc(100% - var(--space-3));
   padding: var(--space-4);
   text-align: center;
   transform: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
 }
 
 .game-end-panel--settings {
-  max-height: min(92dvh, 40rem);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   text-align: center;
+}
+
+.rematch-settings {
+  position: relative;
+  z-index: 2;
 }
 
 .rematch-settings .lobby-field {

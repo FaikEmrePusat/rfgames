@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import type { GameState } from '@rfgames/shared';
 import { BOT_DIFFICULTY_LABELS, chooseBotClaim } from '@rfgames/shared';
 import { GameCanvas } from './GameCanvas';
@@ -378,47 +379,61 @@ export function GameScreen({
         </aside>
       </div>
 
-      {game.phase === 'game_over' && game.winnerIds && (
-        <div className="game-end-overlay">
-          <div className={`parchment-panel game-end-panel ${rematchSettings ? 'game-end-panel--settings' : ''}`}>
-            {rematchSettings ? (
-              rematchSettings
-            ) : (
-              <>
-                <h3 className="hand-title text-4xl mb-1">Sefer bitti</h3>
-                <div className="ornament-line my-2 max-w-[7rem] mx-auto" />
-                <p className="hand-note text-lg mb-4">
-                  {game.winnerIds.length > 1
-                    ? 'Beraberlik — topraklar paylaşıldı!'
-                    : `${game.players.find((p) => p.id === game.winnerIds![0])?.name} zafer kazandı!`}
-                </p>
-                <div className="text-left mb-2">
-                  <PlayerScoreboard
-                    players={game.players}
-                    totalLand={game.totalLandTiles}
-                    currentPlayerId={-1}
-                  />
-                </div>
-                <div className="game-end-actions">
-                  {onPlayAgain && (
-                    <button type="button" onClick={onPlayAgain} className="btn-primary">
-                      Yeniden oyna
+      {game.phase === 'game_over' &&
+        game.winnerIds &&
+        createPortal(
+          <div
+            className="game-end-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="game-end-title"
+          >
+            <div
+              className={`parchment-panel game-end-panel ${
+                rematchSettings ? 'game-end-panel--settings' : ''
+              }`}
+            >
+              {rematchSettings ? (
+                rematchSettings
+              ) : (
+                <>
+                  <h3 id="game-end-title" className="hand-title text-4xl mb-1">
+                    Sefer bitti
+                  </h3>
+                  <div className="ornament-line my-2 max-w-[7rem] mx-auto" />
+                  <p className="hand-note text-lg mb-4">
+                    {game.winnerIds.length > 1
+                      ? 'Beraberlik — topraklar paylaşıldı!'
+                      : `${game.players.find((p) => p.id === game.winnerIds![0])?.name} zafer kazandı!`}
+                  </p>
+                  <div className="text-left mb-2">
+                    <PlayerScoreboard
+                      players={game.players}
+                      totalLand={game.totalLandTiles}
+                      currentPlayerId={-1}
+                    />
+                  </div>
+                  <div className="game-end-actions">
+                    {onPlayAgain && (
+                      <button type="button" onClick={onPlayAgain} className="btn-primary">
+                        Yeniden oyna
+                      </button>
+                    )}
+                    {rematchWaiting && !onPlayAgain && (
+                      <p className="hand-note text-base mb-0">
+                        {rematchHostConfiguring ? 'Host ayarlıyor…' : 'Host yeniden başlatacak…'}
+                      </p>
+                    )}
+                    <button type="button" onClick={onLeave} className="btn-ghost">
+                      Ana menüye dön
                     </button>
-                  )}
-                  {rematchWaiting && !onPlayAgain && (
-                    <p className="hand-note text-base mb-0">
-                      {rematchHostConfiguring ? 'Host ayarlıyor…' : 'Host yeniden başlatacak…'}
-                    </p>
-                  )}
-                  <button type="button" onClick={onLeave} className="btn-ghost">
-                    Ana menüye dön
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
